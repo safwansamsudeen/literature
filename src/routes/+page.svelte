@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import {
+        dropPit,
         call,
         card,
         shuffle,
@@ -41,6 +42,9 @@
     <button on:click={() => shuffle(cards, ids) && assignTeams(cards, ids)}
         >Shuffle</button
     >
+    <button on:click={() => dropPit(cards, ids, $turn, prompt("Pit:"), {})}
+        >Drop pit</button
+    >
 </div>
 
 <div id="card-container"></div>
@@ -53,6 +57,9 @@
         ></div>
     </div>
 {/each}
+
+<h1>Dropped Pits</h1>
+<div id="dropped"></div>
 
 <style>
     .team-block {

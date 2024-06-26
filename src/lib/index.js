@@ -17,6 +17,7 @@ export const NUMBERS = [
     "A"
 ];
 export const SUITS = ["S", "H", "D", "C"];
+const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['A', 'K', 'Q', 'J', '9', '10'] }
 
 let teams;
 export const turn = writable(1);
@@ -53,4 +54,30 @@ export function call(cards, team1, team2, id) {
     teams[team2].splice(teams[team2].indexOf(id), 1);
 
     document.getElementById("team-" + team1).appendChild(cards[id]);
+}
+
+export function dropPit(cards, ids, team, pit, details) {
+    const [order, suit] = pit.split('');
+    const d = document.createElement('div')
+    const pitObj = document.createElement('div')
+    pitObj.classList.add('hand', 'hhand-compact')
+
+
+    let winnerBool = [1, 3, 5].includes(+team);
+    for (let n of ORDERS[order]) {
+        if (!teams[team].includes(n + suit)) {
+            winnerBool = !winnerBool;
+            break;
+        }
+    }
+
+    let winner = winnerBool ? 'A' : 'B'
+    d.innerHTML = `<b>${pit}</b></br>For team ${winner}`
+    d.appendChild(pitObj)
+
+    ORDERS[order].forEach((n) => {
+        pitObj.appendChild(cards[n + suit])
+    })
+
+    document.getElementById('dropped').appendChild(d)
 }
