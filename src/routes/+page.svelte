@@ -1,21 +1,28 @@
 <script>
     import { onMount } from "svelte";
+    import { page } from "$app/stores";
+
+    import skio from "sveltekit-io";
     import {
         dropPit,
         call,
         card,
         shuffle,
-        assignTeams,
+        assignCards,
         SUITS,
         NUMBERS,
-        turn,
     } from "$lib/index";
-    // let turn = 1;
-
+    let turn = 1;
+    let currentPlayer;
     let cards = {};
     let ids = [];
+    let players = {};
 
     onMount(() => {
+        currentPlayer = $page.url.searchParams.has("player")
+            ? +$page.url.searchParams.get("player")
+            : +prompt("Player");
+
         const container = document.getElementById("card-container");
         SUITS.forEach((suit) => {
             NUMBERS.forEach((n) => {
@@ -30,39 +37,61 @@
         });
 
         shuffle(cards, ids);
-        assignTeams(cards, ids);
+        assignCards(currentPlayer);
+
+        const socket = skio.get();
+        socket.on("message", ({ newTurn, players: players_ }) => {
+            if (newTurn) turn = +newTurn;
+            if (players) players = players;
+        });
     });
 </script>
 
 <div>
-    <button
-        on:click={() => call(cards, $turn, prompt("Callee:"), prompt("Card:"))}
+    <button on:click={() => call(turn, +prompt("Callee:"), prompt("Card:"))}
         >Call</button
     >
-    <button on:click={() => shuffle(cards, ids) && assignTeams(cards, ids)}
-        >Shuffle</button
+    <button
+        on:click={() => {
+            shuffle(cards, ids);
+            assignCards();
+        }}>Shuffle</button
     >
-    <button on:click={() => dropPit(cards, ids, $turn, prompt("Pit:"), {})}
+    <button on:click={() => dropPit(ids, turn, prompt("Pit:"), {})}
         >Drop pit</button
     >
 </div>
 
 <div id="card-container"></div>
 {#each [1, 2, 3, 4, 5, 6] as i}
-    <div class="team-block">
-        <h2>Team {i}</h2>
-        <div
-            class="hand hhand-compact {$turn == i ? 'active-hand' : ''}"
-            id="team-{i}"
-        ></div>
-    </div>
+    {#if i === currentPlayer}
+        <div class="player-block">
+            <h2>Player {i}</h2>
+            <div
+                class="hand hhand-compact {turn == i ? 'active-hand' : ''}"
+                id="player-{i}"
+            ></div>
+        </div>
+    {:else}
+        <div class="player-block">
+            <div
+                class="hand hhand-compact {turn == i ? 'active-hand' : ''}"
+                id="player-{i}"
+            >
+                {players[i]?.length}
+            </div>
+        </div>
+    {/if}
 {/each}
 
 <h1>Dropped Pits</h1>
 <div id="dropped"></div>
 
 <style>
-    .team-block {
+    .hidden {
+        display: none !important;
+    }
+    .player-block {
         width: 48%;
         display: inline-block;
     }
