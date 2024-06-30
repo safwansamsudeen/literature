@@ -17,7 +17,7 @@ export const NUMBERS = [
     "A"
 ];
 export const SUITS = ["S", "H", "D", "C"];
-const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['A', 'K', 'Q', 'J', '9', '10'] }
+export const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['9', '10', 'K', 'Q', 'J', 'A',] }
 const socket = skio.get();
 const gameId = Math.floor(Math.random() * 100000)
 
