@@ -6,7 +6,7 @@
     import { dropPit, call, card, shuffle, ORDERS } from "$lib/index";
 
     let turn = 1;
-    let currentPlayer = 1;
+    let currentPlayer = +$page.params.player;
     let droppedPits = [];
     let options = [];
     let moves = [];
@@ -15,12 +15,7 @@
     let callee;
     let gameId = 0;
     $: inplay = turn == currentPlayer;
-
     onMount(() => {
-        currentPlayer = $page.url.searchParams.has("player")
-            ? +$page.url.searchParams.get("player")
-            : +prompt("Player");
-
         oppositePlayers = [1, 3, 5].includes(+currentPlayer)
             ? [2, 4, 6]
             : [1, 3, 5];
