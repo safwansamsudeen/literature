@@ -53,111 +53,119 @@
     }
 </script>
 
-<div>
-    Game ID: {gameId}
-    {#if moves.length === 0}
-        <button on:click={shuffle}>Shuffle</button>
-    {/if}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2">
+            <h5>Game ID: {gameId}</h5>
+            {#if moves.length === 0}
+                <button class="btn btn-primary btn-sm" on:click={shuffle}>Shuffle</button>
+            {/if}
 
-    <button
-        on:click={() => {
-            let details = {};
-            let pit = prompt("Pit:");
-            let p = +prompt("Number of cards held by teammates");
-            for (let i = 0; i < p; i++) {
-                details[prompt("Card")] = +prompt("Teammate");
-            }
-            dropPit(currentPlayer, pit, details);
-        }}>Drop pit</button
-    >
-</div>
-
-<div id="current-player-block">
-    <h2>Your cards</h2>
-    {#if inplay}
-        <p><b>YOUR TURN</b></p>
-    {/if}
-    <div
-        class="hand hhand-compact {inplay ? 'active-hand' : ''}"
-        id="current-player-hand"
-    >
-        {#if players[currentPlayer]}
-            {#each players[currentPlayer] as id}
-                <img
-                    class="card"
-                    src={card(id)}
-                    alt={id}
-                    on:click={showOptions}
-                />
-            {/each}
-        {/if}
-    </div>
-    {#if options.length}
-        <h4>Call</h4>
-        {#each oppositePlayers as number}
-            <div>
-                <input
-                    type="radio"
-                    id={number}
-                    name="number"
-                    value={number}
-                    bind:group={callee}
-                />
-                <label for={number}>{number}</label>
-            </div>
-        {/each}
-        <div class="hand active-hand" id="options">
-            {#each options as id}
-                <img
-                    class="card option-image"
-                    src={card(id)}
-                    alt={id}
-                    on:click={() => {
-                        if (!callee) return;
-                        call(turn, callee, id);
-                        callee = null;
-                        options = [];
-                    }}
-                />
-            {/each}
+            <button
+                class="btn btn-danger btn-sm mt-2"
+                on:click={() => {
+                    let details = {};
+                    let pit = prompt("Pit:");
+                    let p = +prompt("Number of cards held by teammates");
+                    for (let i = 0; i < p; i++) {
+                        details[prompt("Card")] = +prompt("Teammate");
+                    }
+                    dropPit(currentPlayer, pit, details);
+                }}>Drop pit</button>
         </div>
-    {/if}
-</div>
-<hr />
-<div>
-    {#each Object.keys(players) as t}
-        {#if t != currentPlayer}
-            <div class="player-block">
-                Player {t}
-                <div
-                    class="hand hhand-compact {turn == t ? 'active-hand' : ''}"
-                >
-                    {players[t]?.length}
+
+        <div class="col-md-8 text-center">
+            <div id="current-player-block">
+                <h2>Your cards</h2>
+                {#if inplay}
+                    <p><b>YOUR TURN</b></p>
+                {/if}
+                <div class="hand hhand-compact d-flex justify-content-center flex-wrap {inplay ? 'active-hand' : ''}" id="current-player-hand">
+                    {#if players[currentPlayer]}
+                        {#each players[currentPlayer] as id}
+                            <img
+                                class="card m-1"
+                                src={card(id)}
+                                alt={id}
+                                on:click={showOptions}
+                            />
+                        {/each}
+                    {/if}
                 </div>
+                {#if options.length}
+                    <h4>Call</h4>
+                    {#each oppositePlayers as number}
+                        <div>
+                            <input
+                                type="radio"
+                                id={number}
+                                name="number"
+                                value={number}
+                                bind:group={callee}
+                            />
+                            <label for={number}>{number}</label>
+                        </div>
+                    {/each}
+                    <div class="hand active-hand d-flex justify-content-center flex-wrap" id="options">
+                        {#each options as id}
+                            <img
+                                class="card option-image m-1"
+                                src={card(id)}
+                                alt={id}
+                                on:click={() => {
+                                    if (!callee) return;
+                                    call(turn, callee, id);
+                                    callee = null;
+                                    options = [];
+                                }}
+                            />
+                        {/each}
+                    </div>
+                {/if}
             </div>
-        {/if}
-    {/each}
-</div>
+        </div>
 
-<h1>Dropped Pits</h1>
-{#each droppedPits as p}
-    <div>
-        <p>
-            {p.pit}
-            <i>For team {p.team}</i>
-        </p>
-        <div class="hand hhand-compact">
-            {#each p.ids as id}
-                <img class="card" src={card(id)} alt={id} />
+        <div class="col-md-2">
+            <h5>Players</h5>
+            {#each Object.keys(players) as t}
+                {#if t != currentPlayer}
+                    <div class="player-block">
+                        Player {t}
+                        <div class="hand hhand-compact {turn == t ? 'active-hand' : ''}">
+                            {players[t]?.length}
+                        </div>
+                    </div>
+                {/if}
             {/each}
         </div>
     </div>
-{/each}
+
+    <div class="row mt-3">
+        <div class="col">
+            <h1>Dropped Pits</h1>
+            {#each droppedPits as p}
+                <div class="card my-2">
+                    <div class="card-body">
+                        <p>
+                            {p.pit}
+                            <i>For team {p.team}</i>
+                        </p>
+                        <div class="hand hhand-compact d-flex flex-wrap">
+                            {#each p.ids as id}
+                                <img class="card m-1" src={card(id)} alt={id} />
+                            {/each}
+                        </div>
+                    </div>
+                </div>
+            {/each}
+        </div>
+    </div>
+</div>
 
 <style>
     .player-block {
-        width: 48%;
-        display: inline-block;
+        width: 100%;
+        margin-bottom: 10px;
     }
 
     .player-block .active-hand {
@@ -166,20 +174,30 @@
     }
 
     .hand {
-        padding: 10px 40px;
+        padding: 10px 0;
     }
 
     #current-player-hand {
-        height: 200px;
+        height: auto;
     }
 
     .option-image {
         margin: 0 10px;
     }
 
-    #current-player-hand img {
+    #current-player-hand img,
+    #options img,
+    .hand img {
         height: auto;
         width: auto;
+        max-width: 150px;
+    }
+
+    .card {
         max-width: 100px;
+    }
+
+    .card.m-1 {
+        margin: 0.5rem;
     }
 </style>
