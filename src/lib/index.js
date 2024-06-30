@@ -10,14 +10,14 @@ export const NUMBERS = [
     "7",
     "8",
     "9",
-    "10",
+    "T",
     "K",
     "Q",
     "J",
     "A"
 ];
 export const SUITS = ["S", "H", "D", "C"];
-export const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['9', '10', 'K', 'Q', 'J', 'A',] }
+export const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['9', 'T', 'K', 'Q', 'J', 'A',] }
 const socket = skio.get();
 const gameId = Math.floor(Math.random() * 100000)
 

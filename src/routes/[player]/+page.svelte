@@ -41,16 +41,14 @@
         if (!inplay) return;
         let [number, suit] = e.target.alt;
         let pit_ids = [];
-        console.log(ORDERS);
         for (let order in ORDERS) {
-            console.log(ORDERS[order], number);
             if (ORDERS[order].includes(number)) {
                 for (let n of ORDERS[order]) {
                     pit_ids.push(n + suit);
                 }
             }
         }
-        console.log(pit_ids);
+
         options = pit_ids.filter((id) => !players[currentPlayer].includes(id));
     }
 </script>
