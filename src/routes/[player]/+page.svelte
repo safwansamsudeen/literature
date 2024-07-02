@@ -16,6 +16,7 @@
     let gameId = 0;
 
     $: inplay = turn == currentPlayer;
+    $: lastmove = moves[moves.length-1]
     onMount(() => {
         oppositePlayers = [1, 3, 5].includes(+currentPlayer)
             ? [2, 4, 6]
@@ -30,11 +31,13 @@
                 players: players_,
                 droppedPits: droppedPits_,
                 gameId: gameId_,
+                moves: moves_
             }) => {
                 if (newTurn) turn = +newTurn;
                 if (players_?.[1]) players = players_;
                 if (droppedPits_?.length) droppedPits = droppedPits_;
                 if (gameId_) gameId = gameId_;
+                if (moves_) moves = moves_;
             },
         );
     });
@@ -63,6 +66,7 @@
 
         options = pit_ids.filter((id) => !players[currentPlayer].includes(id));
     }
+    $: console.log(moves)
 </script>
 
 <div class="container-fluid">
@@ -87,6 +91,11 @@
         </div>
 
         <div class="col-md-8 text-center">
+            {#if moves.length}
+            <div id='last-move-block'>
+                Last move: {lastmove[0]} called {lastmove[1]} for {lastmove[2]}, <b>{lastmove[3] === 'W' ? 'successfully' : "and didn't get it"}</b>.
+            </div>
+            {/if}
             <div id="current-player-block">
                 <h2>Your cards</h2>
                 {#if inplay}

@@ -21,6 +21,7 @@ export const NUMBERS = [
     "J",
     "A"
 ];
+
 export const SUITS = ["S", "H", "D", "C"];
 export const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['9', 'T', 'K', 'Q', 'J', 'A',], 'J': ['1J', '2J', '8S', '8C', '8H', '8D'] }
 const socket = skio.get();
@@ -28,6 +29,7 @@ const gameId = Math.floor(Math.random() * 100000)
 
 let players;
 let turn = 1;
+let moves = []
 let droppedPits = [];
 let ids_global = [];
 
@@ -49,7 +51,7 @@ export function assignCards() {
         players[t] = ids_global.slice((t - 1) * 9, t * 9);
     }
 
-    socket.emit("message", { players, turn, droppedPits, gameId })
+    socket.emit("message", { players, turn, droppedPits, gameId, moves })
     return players;
 }
 
@@ -57,11 +59,13 @@ export function assignCards() {
 export function call(player1, player2, id) {
     if (!players[player2].includes(id)) {
         turn = player2
-        socket.emit("message", { turn: player2 })
+        moves.push([player1, player2, id, 'L'])
+        socket.emit("message", { turn: player2, moves })
     } else {
         players[player1].push(id);
         players[player2].splice(players[player2].indexOf(id), 1);
-        socket.emit("message", { players })
+        moves.push([player1, player2, id, 'W'])
+        socket.emit("message", { players, moves })
     }
 }
 
