@@ -41,10 +41,14 @@
         if (!inplay) return;
         let [number, suit] = e.target.alt;
         let pit_ids = [];
-        for (let order in ORDERS) {
-            if (ORDERS[order].includes(number)) {
-                for (let n of ORDERS[order]) {
+        for (let order of Object.values(ORDERS)) {
+            if (order.includes(number)) {
+                for (let n of order) {
                     pit_ids.push(n + suit);
+                }
+            } else if (order.includes(number + suit)) {
+                for (let id of order) {
+                    pit_ids.push(id);
                 }
             }
         }

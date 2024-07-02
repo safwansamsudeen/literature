@@ -1,6 +1,11 @@
 import skio from 'sveltekit-io'
 
-export const card = (x) => `https://unpkg.com/cardsJS/dist/cards/${x}.svg`;
+export function card (x) {
+    if (x.endsWith('J')) {
+        return `/${x}.svg`
+    }
+    return `https://unpkg.com/cardsJS/dist/cards/${x}.svg`;
+}
 export const NUMBERS = [
     "2",
     "3",
@@ -17,7 +22,7 @@ export const NUMBERS = [
     "A"
 ];
 export const SUITS = ["S", "H", "D", "C"];
-export const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['9', 'T', 'K', 'Q', 'J', 'A',] }
+export const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['9', 'T', 'K', 'Q', 'J', 'A',], 'J': ['1J', '2J', '8S', '8C', '8H', '8D'] }
 const socket = skio.get();
 const gameId = Math.floor(Math.random() * 100000)
 
@@ -27,7 +32,7 @@ let droppedPits = [];
 let ids_global = [];
 
 export function shuffle() {
-    let ids = []
+    let ids = ['1J', '2J']
     for (let s of SUITS) for (let n of NUMBERS) ids.push(n + s)
     for (let i = ids.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
