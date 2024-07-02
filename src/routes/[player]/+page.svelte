@@ -14,6 +14,7 @@
     let oppositePlayers = [];
     let callee;
     let gameId = 0;
+
     $: inplay = turn == currentPlayer;
     onMount(() => {
         oppositePlayers = [1, 3, 5].includes(+currentPlayer)
@@ -37,20 +38,27 @@
             },
         );
     });
+
     function showOptions(e) {
         if (!inplay) return;
         let [number, suit] = e.target.alt;
         let pit_ids = [];
-        for (let order of Object.values(ORDERS)) {
-            if (order.includes(number)) {
-                for (let n of order) {
-                    pit_ids.push(n + suit);
-                }
-            } else if (order.includes(number + suit)) {
-                for (let id of order) {
+
+        let pit_order;
+        for (let order in ORDERS) {
+             if (ORDERS[order].includes(number + suit)) {
+                for (let id of ORDERS[order]) {
                     pit_ids.push(id);
+                    pit_order = order
                 }
-            }
+                break
+            } else if (suit !== 'J' && ORDERS[order].includes(number)) {
+                for (let n of ORDERS[order]) {
+                    pit_ids.push(n + suit);
+                    pit_order = order
+                }
+                break
+            }  
         }
 
         options = pit_ids.filter((id) => !players[currentPlayer].includes(id));
