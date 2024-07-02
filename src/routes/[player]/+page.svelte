@@ -161,64 +161,150 @@
         </div>
     </div>
 
-    <div class="row mt-3">
-        <div class="col">
-            <h1>Dropped Pits</h1>
-            {#each droppedPits as p}
-                <div class="card my-2">
-                    <div class="card-body">
-                        <p>
-                            {p.pit}
-                            <i>For team {p.team}</i>
-                        </p>
-                        <div class="hand hhand-compact d-flex flex-wrap">
-                            {#each p.ids as id}
-                                <img class="card m-1" src={card(id)} alt={id} />
-                            {/each}
-                        </div>
+    <h1>Dropped Pits</h1>
+    <div class="row mt-3" id="dropped-pits">
+        {#each droppedPits as p}
+        <div class="col-md-4">
+            <div class="card my-2">
+                <div class="card-body">
+                    <p>
+                        {p.pit}
+                        <i>For team {p.team}</i>
+                    </p>
+                    <div class="hand hhand-compact">
+                        {#each p.ids as id}
+                            <img class='card' src={card(id)} alt={id} />
+                        {/each}
                     </div>
                 </div>
-            {/each}
-        </div>
+            </div>
+            </div>
+        {/each}
     </div>
-</div>
-
-<style>
-    .player-block {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
-    .player-block .active-hand {
-        border: 1px solid black;
-        border-radius: 3px;
-    }
-
-    .hand {
-        padding: 10px 0;
-    }
-
-    #current-player-hand {
-        height: auto;
-    }
-
-    .option-image {
-        margin: 0 10px;
-    }
-
-    #current-player-hand img,
-    #options img,
-    .hand img {
-        height: auto;
-        width: auto;
-        max-width: 150px;
-    }
-
-    .card {
-        max-width: 100px;
-    }
-
-    .card.m-1 {
-        margin: 0.5rem;
-    }
-</style>
+    </div>
+    <style>
+        .container-fluid {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+    
+        .row {
+            margin-bottom: 20px;
+        }
+    
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+    
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+    
+        .hand {
+            padding: 10px 0;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    
+        .hand img.card {
+            height: auto;
+            width: auto;
+            max-width: 150px;
+            transition: transform 0.2s;
+        }
+    
+        .hand img.card:hover {
+            transform: scale(1.1);
+        }
+    
+        .player-block {
+            width: 100%;
+            margin-bottom: 10px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+    
+        .player-block .active-hand {
+            border: 2px solid #28a745;
+            border-radius: 5px;
+            padding: 5px;
+        }
+    
+        .option-image {
+            margin: 0 10px;
+            transition: transform 0.2s;
+        }
+    
+        .option-image:hover {
+            transform: scale(1.1);
+        }
+    
+        #current-player-hand {
+            height: auto;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+    
+        #options {
+            margin-top: 20px;
+        }
+    
+        #dropped-pits .hand {
+            margin-left: 50px;
+        }
+        
+        #dropped-pits .hand img.card {
+            height: auto;
+            width: 25%;
+        }
+    
+        .card.m-1 {
+            margin: 0.5rem;
+        }
+    
+        #current-player-block h2, h5, h1, p, label {
+            color: #333;
+        }
+    
+        #current-player-block p {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745;
+        }
+    
+        #current-player-block h4 {
+            margin-top: 20px;
+        }
+    
+        #last-move-block, #dropped-pits {
+            margin-top: 20px;
+        }
+    
+        #last-move-block {
+            padding: 10px;
+            background: #ffc107;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    
+        #last-move-block b {
+            color: #dc3545;
+        }
+    
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+    </style>
+    
