@@ -16,7 +16,8 @@
     let gameId = 0;
 
     $: inplay = turn == currentPlayer;
-    $: lastmove = moves[moves.length-1]
+    $: lastmove = moves[moves.length - 1];
+    
     onMount(() => {
         oppositePlayers = [1, 3, 5].includes(+currentPlayer)
             ? [2, 4, 6]
@@ -31,7 +32,7 @@
                 players: players_,
                 droppedPits: droppedPits_,
                 gameId: gameId_,
-                moves: moves_
+                moves: moves_,
             }) => {
                 if (newTurn) turn = +newTurn;
                 if (players_?.[1]) players = players_;
@@ -49,36 +50,38 @@
 
         let pit_order;
         for (let order in ORDERS) {
-             if (ORDERS[order].includes(number + suit)) {
+            if (ORDERS[order].includes(number + suit)) {
                 for (let id of ORDERS[order]) {
                     pit_ids.push(id);
-                    pit_order = order
+                    pit_order = order;
                 }
-                break
-            } else if (suit !== 'J' && ORDERS[order].includes(number)) {
+                break;
+            } else if (suit !== "J" && ORDERS[order].includes(number)) {
                 for (let n of ORDERS[order]) {
                     pit_ids.push(n + suit);
-                    pit_order = order
+                    pit_order = order;
                 }
-                break
-            }  
+                break;
+            }
         }
 
         options = pit_ids.filter((id) => !players[currentPlayer].includes(id));
     }
-    $: console.log(moves)
 </script>
 
-<div class="container-fluid">
+<div class="container-fluid {inplay ? 'active' : ''}">
     <div class="row">
-        <div class="col-md-2">
-            <h5>Game ID: {gameId}</h5>
+        <div class="col-md-6">
+        <div class="d-flex" id='intro'>
+            <h5 class='text-muted w-20'><small>Game ID: {gameId}</small></h5>
             {#if moves.length === 0}
-                <button class="btn btn-primary btn-sm" on:click={shuffle}>Shuffle</button>
+                <button class="btn btn-primary btn-sm " on:click={shuffle}
+                    >Shuffle</button
+                >
             {/if}
 
             <button
-                class="btn btn-danger btn-sm mt-2"
+                class="btn btn-success btn-sm"
                 on:click={() => {
                     let details = {};
                     let pit = prompt("Pit:");
@@ -87,21 +90,41 @@
                         details[prompt("Card")] = +prompt("Teammate");
                     }
                     dropPit(currentPlayer, pit, details);
-                }}>Drop pit</button>
-        </div>
-
-        <div class="col-md-8 text-center">
-            {#if moves.length}
-            <div id='last-move-block'>
-                Last move: {lastmove[0]} called {lastmove[1]} for {lastmove[2]}, <b>{lastmove[3] === 'W' ? 'successfully' : "and didn't get it"}</b>.
-            </div>
-            {/if}
-            <div id="current-player-block">
-                <h2>Your cards</h2>
-                {#if inplay}
-                    <p><b>YOUR TURN</b></p>
+                }}>Drop</button
+            >
+    </div>
+    </div>
+        <div class="col-md-6 d-flex" id="players-panel">
+            {#each Object.keys(players) as t}
+                {#if t != currentPlayer}
+                    <div class="player-block {turn == t ? 'active' : ''}">
+                        Player {t}: <b>{players[t]?.length}</b>
+                    </div>
                 {/if}
-                <div class="hand hhand-compact d-flex justify-content-center flex-wrap {inplay ? 'active-hand' : ''}" id="current-player-hand">
+            {/each}
+        </div>
+    </div>
+    {#if moves.length}
+            <div class="alert alert-success text-center w-75 mx-auto" role="alert">
+                    Last move: {lastmove[0]} called {lastmove[1]} for {lastmove[2]},
+                    <b
+                        >{lastmove[3] === "W"
+                            ? "successfully"
+                            : "and didn't get it"}</b
+                    >.
+                    </div>
+
+            {/if}
+            <h2 class='text-center'>Your Cards</h2>
+    <div class="row">
+        <div class="col-md-8 text-center">
+            <div id="current-player-block">
+                <div
+                    class="hand hhand-compact d-flex justify-content-center flex-wrap {inplay
+                        ? 'active-hand'
+                        : ''}"
+                    id="current-player-hand"
+                >
                     {#if players[currentPlayer]}
                         {#each players[currentPlayer] as id}
                             <img
@@ -113,21 +136,28 @@
                         {/each}
                     {/if}
                 </div>
-                {#if options.length}
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            {#if options.length}
                     <h4>Call</h4>
                     {#each oppositePlayers as number}
-                        <div>
+                        <div class='form-check form-check-inline player-option'>
                             <input
                                 type="radio"
                                 id={number}
                                 name="number"
+                                class="form-check-input"
                                 value={number}
                                 bind:group={callee}
                             />
-                            <label for={number}>{number}</label>
+                            <label for={number} class="form-check-label">{number}</label>
                         </div>
                     {/each}
-                    <div class="hand active-hand d-flex justify-content-center flex-wrap" id="options">
+                    <div
+                        class="hand active-hand d-flex justify-content-center flex-wrap"
+                        id="options"
+                    >
                         {#each options as id}
                             <img
                                 class="card option-image m-1"
@@ -143,168 +173,153 @@
                         {/each}
                     </div>
                 {/if}
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <h5>Players</h5>
-            {#each Object.keys(players) as t}
-                {#if t != currentPlayer}
-                    <div class="player-block">
-                        Player {t}
-                        <div class="hand hhand-compact {turn == t ? 'active-hand' : ''}">
-                            {players[t]?.length}
-                        </div>
-                    </div>
-                {/if}
-            {/each}
         </div>
     </div>
 
     <h1>Dropped Pits</h1>
     <div class="row mt-3" id="dropped-pits">
         {#each droppedPits as p}
-        <div class="col-md-4">
-            <div class="card my-2">
-                <div class="card-body">
-                    <p>
-                        {p.pit}
-                        <i>For team {p.team}</i>
-                    </p>
-                    <div class="hand hhand-compact">
-                        {#each p.ids as id}
-                            <img class='card' src={card(id)} alt={id} />
-                        {/each}
+            <div class="col-md-4">
+                <div class="card my-2">
+                    <div class="card-body">
+                        <p>
+                            {p.pit}
+                            <i>For team {p.team}</i>
+                        </p>
+                        <div class="hand hhand-compact">
+                            {#each p.ids as id}
+                                <img class="card" src={card(id)} alt={id} />
+                            {/each}
+                        </div>
                     </div>
                 </div>
             </div>
-            </div>
         {/each}
     </div>
-    </div>
-    <style>
-        .container-fluid {
-            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
-    
-        .row {
-            margin-bottom: 20px;
-        }
-    
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-    
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
-    
-        .hand {
-            padding: 10px 0;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-    
-        .hand img.card {
-            height: auto;
-            width: auto;
-            max-width: 150px;
-            transition: transform 0.2s;
-        }
-    
-        .hand img.card:hover {
-            transform: scale(1.1);
-        }
-    
-        .player-block {
-            width: 100%;
-            margin-bottom: 10px;
-            background: #fff;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-    
-        .player-block .active-hand {
-            border: 2px solid #28a745;
-            border-radius: 5px;
-            padding: 5px;
-        }
-    
-        .option-image {
-            margin: 0 10px;
-            transition: transform 0.2s;
-        }
-    
-        .option-image:hover {
-            transform: scale(1.1);
-        }
-    
-        #current-player-hand {
-            height: auto;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-    
-        #options {
-            margin-top: 20px;
-        }
-    
-        #dropped-pits .hand {
-            margin-left: 50px;
-        }
-        
-        #dropped-pits .hand img.card {
-            height: auto;
-            width: 25%;
-        }
-    
-        .card.m-1 {
-            margin: 0.5rem;
-        }
-    
-        #current-player-block h2, h5, h1, p, label {
-            color: #333;
-        }
-    
-        #current-player-block p {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #28a745;
-        }
-    
-        #current-player-block h4 {
-            margin-top: 20px;
-        }
-    
-        #last-move-block, #dropped-pits {
-            margin-top: 20px;
-        }
-    
-        #last-move-block {
-            padding: 10px;
-            background: #ffc107;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-    
-        #last-move-block b {
-            color: #dc3545;
-        }
-    
-        .card {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-        }
-    </style>
-    
+</div>
+
+<style>
+    .container-fluid {
+        background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        padding: 20px;
+        height: 100vh;
+    }
+
+    .container-fluid.active {
+        background: linear-gradient(135deg, #99E1D9, #70ABAF);
+    }
+
+    .row {
+        margin-bottom: 20px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .hand {
+        padding: 10px 0;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .hand img.card {
+        height: auto;
+        width: auto;
+        max-width: 150px;
+        transition: transform 0.2s;
+    }
+
+    .hand img.option-image:hover {
+        transform: scale(1.05);
+    }
+
+    #players-panel {
+        justify-content: space-between;
+    }
+
+    .player-block {
+        height: min-content;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        padding: 6px 12px;
+    }
+
+    .player-block.active {
+        background-color: #F46036;
+        color: white;
+    }
+
+    .option-image {
+        margin: 0 10px;
+        transition: transform 0.2s;
+    }
+
+    .player-option {
+        padding: 0px 10px;
+    }
+
+    #current-player-hand {
+        height: auto;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    #options {
+        margin-top: 20px;
+    }
+
+    #dropped-pits .hand {
+        margin-left: 50px;
+    }
+
+    #dropped-pits .hand img.card {
+        height: auto;
+        width: 25%;
+    }
+
+    .card.m-1 {
+        margin: 0.5rem;
+    }
+
+    #current-player-block h2,
+    h5,
+    h1,
+    p,
+    label {
+        color: #333;
+    }
+
+    #current-player-block p {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    #current-player-block h4 {
+        margin-top: 20px;
+    }
+
+    #last-move-block,
+    #dropped-pits {
+        margin-top: 20px;
+    }
+
+    #last-move-block {
+        padding: 10px;
+        background: #ffc107;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #last-move-block b {
+        color: #dc3545;
+    }
+
+</style>
