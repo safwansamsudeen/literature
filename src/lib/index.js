@@ -70,14 +70,15 @@ export function call(player1, player2, id) {
 }
 
 export function dropPit(player, pit, details) {
-    const [order, suit] = pit.split('');
+    let [order, suit] = pit.split('');
+    if (!suit) suit = '';
 
     let pit_ids = []
     let flag = [1, 3, 5].includes(+player)
     let winnerBool = flag;
     for (let n of ORDERS[order]) {
         pit_ids.push(n + suit)
-        if (winnerBool === flag && !players[player].includes(n + suit) && !players[details[n + suit]].includes(n + suit)) {
+        if (winnerBool === flag && !players[+player].includes(n + suit) && !players[details[n + suit]]?.includes?.(n + suit)) {
             winnerBool = !winnerBool;
         }
     }

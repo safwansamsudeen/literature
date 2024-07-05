@@ -143,7 +143,7 @@
                     {#if players[currentPlayer]}
                         {#each players[currentPlayer] as id}
                             <img
-                                class="card m-1"
+                                class="lit-card m-1"
                                 src={card(id)}
                                 alt={id}
                                 on:click={showOptions}
@@ -161,7 +161,7 @@
                     >
                         {#each options as id}
                             <img
-                                class="card option-image m-1"
+                                class="lit-card option-image m-1"
                                 src={card(id)}
                                 alt={id}
                                 on:click={() => {
@@ -177,24 +177,22 @@
         </div>
     </div>
 
-    <h1>Dropped Pits</h1>
+    <h3 class='text-center'>Dropped Pits</h3>
     <div class="row mt-3" id="dropped-pits">
         {#each droppedPits as p}
-            <div class="col-md-4">
-                <div class="card my-2">
+                <div class="card my-2 col-md-6">
                     <div class="card-body">
                         <p>
-                            {p.pit}
+                            {p.pit}: 
                             <i>For team {p.team}</i>
                         </p>
-                        <div class="hand hhand-compact">
+                        <div class="hand">
                             {#each p.ids as id}
-                                <img class="card" src={card(id)} alt={id} />
+                                <img class='lit-card' src={card(id)} alt={id} />
                             {/each}
                         </div>
                     </div>
                 </div>
-            </div>
         {/each}
     </div>
 </div>
@@ -203,6 +201,7 @@
     .container-fluid {
         background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
         padding: 20px;
+        min-height: 100vh;
         height: 100%;
     }
 
@@ -219,18 +218,23 @@
         border-color: #007bff;
     }
 
-    .hand {
+    #current-player-block .hand {
         padding: 10px 0;
         background: #fff;
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    .hand img.card {
+    .hand img.lit-card {
         height: auto;
         width: auto;
         max-width: 150px;
         transition: transform 0.2s;
+    }
+    
+    #dropped-pits .hand img.lit-card {
+        max-width: 14%;
+        margin: 5px;
     }
 
     .hand img.option-image:hover {
@@ -276,20 +280,7 @@
         margin-top: 20px;
     }
 
-    #dropped-pits .hand {
-        margin-left: 50px;
-    }
-
-    #dropped-pits .hand img.card {
-        height: auto;
-        width: 25%;
-    }
-
-    .card.m-1 {
-        margin: 0.5rem;
-    }
-
-    #current-player-block h2,
+    h2,
     h5,
     h1,
     p,
@@ -297,15 +288,6 @@
         color: #333;
     }
 
-    #current-player-block p {
-        font-size: 1.2em;
-        font-weight: bold;
-        color: #28a745;
-    }
-
-    #current-player-block h4 {
-        margin-top: 20px;
-    }
 
     #last-move-block,
     #dropped-pits {
@@ -318,9 +300,4 @@
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-
-    #last-move-block b {
-        color: #dc3545;
-    }
-
 </style>
