@@ -17,7 +17,7 @@
 
     $: inplay = turn == currentPlayer;
     $: lastmove = moves[moves.length - 1];
-    
+
     onMount(() => {
         oppositePlayers = [1, 3, 5].includes(+currentPlayer)
             ? [2, 4, 6]
@@ -72,23 +72,25 @@
 <div class="container-fluid {inplay ? 'active' : ''}">
     <div class="row">
         <div class="col-md-6">
-        <div class="d-flex" id='intro'>
-            <h5 class='text-muted w-20'><small>Game ID: {gameId}</small></h5>
+            <div class="d-flex" id="intro">
+                <h5 class="text-muted w-20">
+                    <small>Game ID: {gameId}</small>
+                </h5>
 
-            <button
-                class="btn btn-success btn-sm"
-                on:click={() => {
-                    let details = {};
-                    let pit = prompt("Pit:");
-                    let p = +prompt("Number of cards held by teammates");
-                    for (let i = 0; i < p; i++) {
-                        details[prompt("Card")] = +prompt("Teammate");
-                    }
-                    dropPit(currentPlayer, pit, details);
-                }}>Drop</button
-            >
-    </div>
-    </div>
+                <button
+                    class="btn btn-success btn-sm"
+                    on:click={() => {
+                        let details = {};
+                        let pit = prompt("Pit:");
+                        let p = +prompt("Number of cards held by teammates");
+                        for (let i = 0; i < p; i++) {
+                            details[prompt("Card")] = +prompt("Teammate");
+                        }
+                        dropPit(currentPlayer, pit, details);
+                    }}>Drop</button
+                >
+            </div>
+        </div>
         <div class="col-md-6 d-flex" id="players-panel">
             {#each Object.keys(players) as t}
                 {#if t != currentPlayer}
@@ -100,37 +102,43 @@
         </div>
     </div>
     {#if moves.length}
-            <div class="alert alert-{lastmove[3] === "W" ? 'success' : 'danger'} text-center w-75 mx-auto" role="alert">
-                    <i>Last Move</i>: {lastmove[0] === currentPlayer ? 'you' : lastmove[0]} called {lastmove[1] === currentPlayer ? 'you' : lastmove[1]} for {lastmove[2]},
-                    <b
-                        >{lastmove[3] === "W"
-                            ? "successfully"
-                            : "and didn't get it"}</b
-                    >.
-                    </div>
-
-            {/if}
-            <div class="row">
-            <h2 class='text-center col-md-8'>Your Cards</h2>
-            {#if options.length}
-            <div class="col-md-4 text-center">
-            <h4>Call</h4>
-                    {#each oppositePlayers as number}
-                        <div class='form-check form-check-inline player-option'>
-                            <input
-                                type="radio"
-                                id={number}
-                                name="number"
-                                class="form-check-input"
-                                value={number}
-                                bind:group={callee}
-                            />
-                            <label for={number} class="form-check-label">{number}</label>
-                        </div>
-                    {/each}
-                </div>
-            {/if}
+        <div
+            class="alert alert-{lastmove[3] === 'W'
+                ? 'success'
+                : 'danger'} text-center w-75 mx-auto"
+            role="alert"
+        >
+            <i>Last Move</i>: {lastmove[0] === currentPlayer
+                ? "you"
+                : lastmove[0]} called {lastmove[1] === currentPlayer
+                ? "you"
+                : lastmove[1]} for {lastmove[2]},
+            <b>{lastmove[3] === "W" ? "successfully" : "and didn't get it"}</b>.
         </div>
+    {/if}
+    <div class="row">
+        <h2 class="text-center col-md-8">Your Cards</h2>
+        {#if options.length}
+            <div class="col-md-4 text-center">
+                <h4>Call</h4>
+                {#each oppositePlayers as number}
+                    <div class="form-check form-check-inline player-option">
+                        <input
+                            type="radio"
+                            id={number}
+                            name="number"
+                            class="form-check-input"
+                            value={number}
+                            bind:group={callee}
+                        />
+                        <label for={number} class="form-check-label"
+                            >{number}</label
+                        >
+                    </div>
+                {/each}
+            </div>
+        {/if}
+    </div>
     <div class="row">
         <div class="col-md-8 text-center">
             <div id="current-player-block">
@@ -155,44 +163,46 @@
         </div>
         <div class="col-md-4 text-center">
             {#if options.length}
-                    <div
-                        class="hand active-hand d-flex justify-content-center flex-wrap"
-                        id="options"
-                    >
-                        {#each options as id}
-                            <img
-                                class="lit-card option-image m-1"
-                                src={card(id)}
-                                alt={id}
-                                on:click={() => {
-                                    if (!callee) return;
-                                    call(turn, callee, id);
-                                    callee = null;
-                                    options = [];
-                                }}
-                            />
-                        {/each}
-                    </div>
-                {/if}
+                <div
+                    class="hand active-hand d-flex justify-content-center flex-wrap"
+                    id="options"
+                >
+                    {#each options as id}
+                        <img
+                            class="lit-card option-image m-1"
+                            src={card(id)}
+                            alt={id}
+                            on:click={() => {
+                                if (!callee) return;
+                                call(turn, callee, id);
+                                callee = null;
+                                options = [];
+                            }}
+                        />
+                    {/each}
+                </div>
+            {/if}
         </div>
     </div>
 
-    <h3 class='text-center'>Dropped Pits</h3>
+    <h3 class="text-center">Dropped Pits</h3>
     <div class="row mt-3" id="dropped-pits">
         {#each droppedPits as p}
-                <div class="card my-2 col-md-6">
-                    <div class="card-body">
-                        <p>
-                            {p.pit}: 
-                            <i>For team {p.team}</i>
-                        </p>
-                        <div class="hand">
-                            {#each p.ids as id}
-                                <img class='lit-card' src={card(id)} alt={id} />
-                            {/each}
-                        </div>
+            <div class="card my-2 col-md-6">
+                <div class="card-body">
+                    <p>
+                        {p.pit}:
+                        <i>For team {p.team}</i>
+                    </p>
+                    <div class="hand">
+                        {#each p.ids as id}
+                            <img class="lit-card" src={card(id)} alt={id} />
+                        {/each}
                     </div>
                 </div>
+            </div>
+        {:else}
+            <p class="text-center col-md-12"><i>None dropped yet!</i></p>
         {/each}
     </div>
 </div>
@@ -206,7 +216,7 @@
     }
 
     .container-fluid.active {
-        background: linear-gradient(135deg, #99E1D9, #70ABAF);
+        background: linear-gradient(135deg, #99e1d9, #70abaf);
     }
 
     .row {
@@ -231,7 +241,7 @@
         max-width: 150px;
         transition: transform 0.2s;
     }
-    
+
     #dropped-pits .hand img.lit-card {
         max-width: 14%;
         margin: 5px;
@@ -255,7 +265,7 @@
     }
 
     .player-block.active {
-        background-color: #F46036;
+        background-color: #f46036;
         color: white;
     }
 
@@ -287,7 +297,6 @@
     label {
         color: #333;
     }
-
 
     #last-move-block,
     #dropped-pits {

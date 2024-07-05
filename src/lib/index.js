@@ -1,6 +1,6 @@
 import skio from 'sveltekit-io'
 
-export function card (x) {
+export function card(x) {
     if (x.endsWith('J')) {
         return `/${x}.svg`
     }
