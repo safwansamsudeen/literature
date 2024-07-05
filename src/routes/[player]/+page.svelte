@@ -72,7 +72,7 @@
 <div class="container-fluid {inplay ? 'active' : ''}">
     <div class="row">
         <div class="col-md-6">
-            <div class="d-flex" id="intro">
+            <div id="intro">
                 <h5 class="text-muted w-20">
                     <small>Game ID: {gameId}</small>
                 </h5>
