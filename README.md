@@ -1,38 +1,29 @@
-# create-svelte
+# Literature Card Game - Online Version
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+Welcome to the online version of the classic card game, Literature! Built using SvelteKit and Svelte, this app brings the fun and strategy of Literature to your browser, allowing you to play with friends in real-time.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **Real-Time Gameplay:** Enjoy seamless real-time interaction with friends through our robust Socket.io integration.
+- **Intuitive Interface:** Our user-friendly design ensures that you can focus on the game without any distractions.
+- **Cross-Platform Compatibility:** Play on any device with a modern web browser.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## How to Play
 
-# create a new project in my-app
-npm create svelte@latest my-app
+Literature is a strategic card game played with six players divided into two teams. The objective is to collect sets of cards and outwit your opponents. If you're new to the game or need a refresher, check out the detailed [rules of Literature](https://www.pagat.com/partition/literature.html).
+
+## Installation and Set up
+
+1. Clone the repository:
 ```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+   git clone https://github.com/safwansamsudeen/literature.git
+   cd literature-game
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
+2. Install the dependencies:
 ```
+npm install
+```
+3. Run with `npm run dev`.
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## Issues
+I hope you enjoy this game, and I really appreciate it if you open issues for feedback or bugs. Thanks!
