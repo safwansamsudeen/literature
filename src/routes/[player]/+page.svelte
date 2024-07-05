@@ -74,11 +74,6 @@
         <div class="col-md-6">
         <div class="d-flex" id='intro'>
             <h5 class='text-muted w-20'><small>Game ID: {gameId}</small></h5>
-            {#if moves.length === 0}
-                <button class="btn btn-primary btn-sm " on:click={shuffle}
-                    >Shuffle</button
-                >
-            {/if}
 
             <button
                 class="btn btn-success btn-sm"
@@ -105,8 +100,8 @@
         </div>
     </div>
     {#if moves.length}
-            <div class="alert alert-success text-center w-75 mx-auto" role="alert">
-                    Last move: {lastmove[0]} called {lastmove[1]} for {lastmove[2]},
+            <div class="alert alert-{lastmove[3] === "W" ? 'success' : 'danger'} text-center w-75 mx-auto" role="alert">
+                    <i>Last Move</i>: {lastmove[0] === currentPlayer ? 'you' : lastmove[0]} called {lastmove[1] === currentPlayer ? 'you' : lastmove[1]} for {lastmove[2]},
                     <b
                         >{lastmove[3] === "W"
                             ? "successfully"
@@ -115,7 +110,27 @@
                     </div>
 
             {/if}
-            <h2 class='text-center'>Your Cards</h2>
+            <div class="row">
+            <h2 class='text-center col-md-8'>Your Cards</h2>
+            {#if options.length}
+            <div class="col-md-4 text-center">
+            <h4>Call</h4>
+                    {#each oppositePlayers as number}
+                        <div class='form-check form-check-inline player-option'>
+                            <input
+                                type="radio"
+                                id={number}
+                                name="number"
+                                class="form-check-input"
+                                value={number}
+                                bind:group={callee}
+                            />
+                            <label for={number} class="form-check-label">{number}</label>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+        </div>
     <div class="row">
         <div class="col-md-8 text-center">
             <div id="current-player-block">
@@ -140,20 +155,6 @@
         </div>
         <div class="col-md-4 text-center">
             {#if options.length}
-                    <h4>Call</h4>
-                    {#each oppositePlayers as number}
-                        <div class='form-check form-check-inline player-option'>
-                            <input
-                                type="radio"
-                                id={number}
-                                name="number"
-                                class="form-check-input"
-                                value={number}
-                                bind:group={callee}
-                            />
-                            <label for={number} class="form-check-label">{number}</label>
-                        </div>
-                    {/each}
                     <div
                         class="hand active-hand d-flex justify-content-center flex-wrap"
                         id="options"
@@ -202,7 +203,7 @@
     .container-fluid {
         background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
         padding: 20px;
-        height: 100vh;
+        height: 100%;
     }
 
     .container-fluid.active {
