@@ -65,7 +65,7 @@
             }
         }
 
-        options = pit_ids.filter((id) => !players[currentPlayer].includes(id));
+        options = pit_ids;
     }
 </script>
 
