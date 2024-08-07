@@ -1,10 +1,10 @@
 <script>
+    export let data;
     import { onMount } from "svelte";
     import { page } from "$app/stores";
 
-    import skio from "sveltekit-io";
-    import { dropPit, call, card, shuffle, ORDERS, room } from "$lib/index";
-
+    import { dropPit, call, card, shuffle, ORDERS } from "$lib/index";
+    
     let turn = 1;
     let currentPlayer = +$page.params.player;
     let droppedPits = [];
@@ -13,22 +13,22 @@
     let players = {};
     let oppositePlayers = [];
     let callee;
-    let gameId = 0;
+    let gameId = $page.params.gameid;
+
+    let room = data.room
 
     $: inplay = turn == currentPlayer;
     $: lastmove = moves[moves.length - 1];
-
+    console.log(room.getSelf(), room.getOthers())
     const unsubscribe = room.subscribe("my-presence", ({
                 turn: newTurn,
                 players: players_,
                 droppedPits: droppedPits_,
-                gameId: gameId_,
                 moves: moves_,
             }) => {
                 if (newTurn) turn = +newTurn;
                 if (players_?.[1]) players = players_;
                 if (droppedPits_?.length) droppedPits = droppedPits_;
-                if (gameId_) gameId = gameId_;
                 if (moves_) moves = moves_;
     });
 
@@ -36,7 +36,7 @@
         oppositePlayers = [1, 3, 5].includes(+currentPlayer)
             ? [2, 4, 6]
             : [1, 3, 5];
-        shuffle();
+        shuffle(room);
     });
 
     function showOptions(e) {
@@ -82,7 +82,7 @@
                         for (let i = 0; i < p; i++) {
                             details[prompt("Card")] = +prompt("Teammate");
                         }
-                        dropPit(currentPlayer, pit, details);
+                        dropPit(room, currentPlayer, pit, details);
                     }}>Drop</button
                 >
             </div>
@@ -170,7 +170,7 @@
                             alt={id}
                             on:click={() => {
                                 if (!callee) return;
-                                call(turn, callee, id);
+                                call(room, turn, callee, id);
                                 callee = null;
                                 options = [];
                             }}
