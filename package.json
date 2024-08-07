@@ -17,6 +17,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@liveblocks/client": "^2.4.0",
 		"cardsJS": "^1.1.1",
 		"sveltekit-io": "^1.0.11"
 	}

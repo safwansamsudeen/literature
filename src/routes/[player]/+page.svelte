@@ -3,7 +3,7 @@
     import { page } from "$app/stores";
 
     import skio from "sveltekit-io";
-    import { dropPit, call, card, shuffle, ORDERS } from "$lib/index";
+    import { dropPit, call, card, shuffle, ORDERS, room } from "$lib/index";
 
     let turn = 1;
     let currentPlayer = +$page.params.player;
@@ -18,16 +18,7 @@
     $: inplay = turn == currentPlayer;
     $: lastmove = moves[moves.length - 1];
 
-    onMount(() => {
-        oppositePlayers = [1, 3, 5].includes(+currentPlayer)
-            ? [2, 4, 6]
-            : [1, 3, 5];
-        shuffle();
-
-        const socket = skio.get();
-        socket.on(
-            "message",
-            ({
+    const unsubscribe = room.subscribe("my-presence", ({
                 turn: newTurn,
                 players: players_,
                 droppedPits: droppedPits_,
@@ -39,8 +30,13 @@
                 if (droppedPits_?.length) droppedPits = droppedPits_;
                 if (gameId_) gameId = gameId_;
                 if (moves_) moves = moves_;
-            },
-        );
+    });
+
+    onMount(() => {
+        oppositePlayers = [1, 3, 5].includes(+currentPlayer)
+            ? [2, 4, 6]
+            : [1, 3, 5];
+        shuffle();
     });
 
     function showOptions(e) {
@@ -76,7 +72,7 @@
                 <h5 class="text-muted w-20">
                     <small>Game ID: {gameId}</small>
                 </h5>
-
+                
                 <button
                     class="btn btn-success btn-sm"
                     on:click={() => {
