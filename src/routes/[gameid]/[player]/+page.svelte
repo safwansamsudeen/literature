@@ -1,6 +1,6 @@
 <script>
     export let data;
-    import { onMount } from "svelte";
+    import { onDestroy } from "svelte";
     import { page } from "$app/stores";
 
     import { dropPit, call, card, shuffle, ORDERS } from "$lib/index";
@@ -19,25 +19,48 @@
 
     $: inplay = turn == currentPlayer;
     $: lastmove = moves[moves.length - 1];
-    console.log(room.getSelf(), room.getOthers())
-    const unsubscribe = room.subscribe("my-presence", ({
+    
+    room.connect();
+    
+    const unsubscribe1 = room.subscribe("event", ({ event: {
                 turn: newTurn,
                 players: players_,
                 droppedPits: droppedPits_,
                 moves: moves_,
-            }) => {
+            }, user, connectionId }) => {
                 if (newTurn) turn = +newTurn;
                 if (players_?.[1]) players = players_;
                 if (droppedPits_?.length) droppedPits = droppedPits_;
                 if (moves_) moves = moves_;
+                console.log(players[1])
     });
 
-    onMount(() => {
-        oppositePlayers = [1, 3, 5].includes(+currentPlayer)
+    let unsubscribe3;
+    (async  () => {
+        const { root } = await room.getStorage();
+
+        unsubscribe3 = room.subscribe(root, (updatedRoot) => {
+            console.log(updatedRoot)
+        });
+    })()
+    
+
+    const unsubscribe2 = room.subscribe("others", (others, event) => {
+        if (others.length === 2) {
+            oppositePlayers = [1, 3, 5].includes(+currentPlayer)
             ? [2, 4, 6]
             : [1, 3, 5];
-        shuffle(room);
+            shuffle(room);
+
+        }
     });
+
+    onDestroy(() => {
+        data.leave()
+        unsubscribe1()
+        unsubscribe2()
+        unsubscribe3?.()
+    })
 
     function showOptions(e) {
         if (!inplay) return;

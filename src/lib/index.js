@@ -1,5 +1,3 @@
-import skio from 'sveltekit-io'
-
 export function card(x) {
     if (x.endsWith('J')) {
         return `/${x}.svg`
@@ -22,7 +20,7 @@ export const NUMBERS = [
     "A"
 ];
 
-
+import {LiveObject, LiveMap} from "@liveblocks/client";
 export const SUITS = ["S", "H", "D", "C"];
 export const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['9', 'T', 'K', 'Q', 'J', 'A',], 'J': ['1J', '2J', '8S', '8C', '8H', '8D'] }
 
@@ -31,6 +29,7 @@ let turn = 1;
 let moves = []
 let droppedPits = [];
 let ids_global = [];
+
 
 export function shuffle(room) {
     let ids = ['1J', '2J']
@@ -43,29 +42,35 @@ export function shuffle(room) {
     assignCards(room)
 }
 
-export function assignCards(room) {
+export async function assignCards(room) {
     players = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
 
     for (let t = 1; t <= 6; t++) {
         players[t] = ids_global.slice((t - 1) * 9, t * 9);
     }
+    const data = new LiveObject({ players, turn, droppedPits, moves });
+    const game = new LiveMap();
+    game.set("data", data);
 
-    room.updatePresence({ players, turn, droppedPits, moves })
-    console.log(room, room.getPresence().players[1])
+    const { root } = await room.getStorage();
+    root.set(game);
+
+    room.broadcastEvent({ players, turn, droppedPits, moves })
     return players;
 }
 
 
 export function call(room, player1, player2, id) {
+    room.broadcastEvent({ type: "REACTION", emoji: "🔥" });
     if (!players[player2].includes(id)) {
         turn = player2
         moves.push([player1, player2, id, 'L'])
-        room.updatePresence({ turn: player2, moves })
+        room.broadcastEvent({ turn: player2, moves })
     } else {
         players[player1].push(id);
         players[player2].splice(players[player2].indexOf(id), 1);
         moves.push([player1, player2, id, 'W'])
-        room.updatePresence({ players, moves })
+        room.broadcastEvent({ players, moves })
     }
 
 }
@@ -95,5 +100,5 @@ export function dropPit(room, player, pit, details) {
         alert('Yayy, a pit is dropped!')
     }
 
-    room.updatePresence({ droppedPits, players })
+    room.broadcastEvent({ droppedPits, players })
 }
