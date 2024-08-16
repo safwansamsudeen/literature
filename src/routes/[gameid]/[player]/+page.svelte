@@ -3,7 +3,7 @@
     import { onDestroy } from "svelte";
     import { page } from "$app/stores";
 
-    import { dropPit, call, card, shuffle, ORDERS } from "$lib/index";
+    import {  dropPit, call, card, shuffle, ORDERS } from "$lib/index";
     
     let turn = 1;
     let currentPlayer = +$page.params.player;
@@ -21,7 +21,6 @@
     $: lastmove = moves[moves.length - 1] || [];
     
     room.connect();
-
 
     let unsubscribe3;
     (async  () => {
@@ -45,7 +44,8 @@
     oppositePlayers = [1, 3, 5].includes(+currentPlayer)
         ? [2, 4, 6]
         : [1, 3, 5];
-        shuffle(room);
+
+    shuffle(room);  
 
     onDestroy(() => {
         data.leave()
@@ -232,10 +232,6 @@
         margin-bottom: 20px;
     }
 
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-    }
 
     #current-player-block .hand {
         padding: 10px 0;
@@ -301,7 +297,6 @@
 
     h2,
     h5,
-    h1,
     p,
     label {
         color: #333;

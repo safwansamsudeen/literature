@@ -23,12 +23,16 @@ export const NUMBERS = [
 export const SUITS = ["S", "H", "D", "C"];
 export const ORDERS = { 'L': ['2', '3', '4', '5', '6', '7'], 'U': ['9', 'T', 'K', 'Q', 'J', 'A',], 'J': ['1J', '2J', '8S', '8C', '8H', '8D'] }
 
-let players;
 let turn = 2;
 let moves = []
 let droppedPits = [];
 let ids_global = [];
 
+
+export async function broadcast(room, obj)  {
+    const { root } = await room.getStorage();
+    await root.update(obj)
+}
 
 export function shuffle(room) {
     let ids = ['1J', '2J']
@@ -41,30 +45,22 @@ export function shuffle(room) {
     assignCards(room)
 }
 
-async function broadcast(room, obj)  {
-    const { root } = await room.getStorage();
-    console.log(obj)
-    await root.update(obj)
-    console.log(root.toObject())
-}
-
 export async function assignCards(room) {
-    players = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+    let players = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
 
     for (let t = 1; t <= 6; t++) {
         players[t] = ids_global.slice((t - 1) * 9, t * 9);
     }
-
-    const { root } = await room.getStorage();
-    root.update({ turn, droppedPits, moves });
     
-    await broadcast(room, { players })
+    await broadcast(room, { players, turn, droppedPits, moves })
     return players;
 }
 
 
 export async function call(room, player1, player2, id) {
-    console.log('calling', players, player2)
+    const { root } = await room.getStorage();
+    let players = root.toObject().players
+
     if (!players[player2].includes(id)) {
         turn = player2
         moves.push([player1, player2, id, 'L'])
@@ -77,7 +73,10 @@ export async function call(room, player1, player2, id) {
     }
 }
 
-export function dropPit(room, player, pit, details) {
+export async function dropPit(room, player, pit, details) {
+    const { root } = await room.getStorage();
+    let players = root.toObject().players
+
     let [order, suit] = pit.split('');
     if (!suit) suit = '';
 
@@ -102,5 +101,5 @@ export function dropPit(room, player, pit, details) {
         alert('Yayy, a pit is dropped!')
     }
 
-    room.broadcastEvent({ droppedPits, players })
+    broadcast(room, { droppedPits, players })
 }
