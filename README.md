@@ -15,15 +15,20 @@ Literature is a strategic card game played with six players divided into two tea
 ## Installation and Set up
 
 1. Clone the repository:
+
 ```
    git clone https://github.com/safwansamsudeen/literature.git
    cd literature-game
 ```
+
 2. Install the dependencies:
+
 ```
 npm install
 ```
+
 3. Run with `npm run dev`.
 
 ## Issues
+
 I hope you enjoy this game, and I really appreciate it if you open issues for feedback or bugs. Thanks!

@@ -1,22 +1,23 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%sveltekit.assets%/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" type="text/css" href="/cards.min.css" />
 
-<head>
-	<meta charset="utf-8" />
-	<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<link
-	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-	rel="stylesheet"
-	/>
-	<link rel="stylesheet" type="text/css" href="/cards.min.css" />
+    %sveltekit.head%
+  </head>
 
-	%sveltekit.head%
-</head>
-
-<body data-sveltekit-preload-data="hover">
-	<div style="display: contents; width: 100%;">%sveltekit.body%</div>
-	<script src="https://richardschneider.github.io/cardsJS/cards.js" type="text/javascript"></script>
-</body>
-
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents; width: 100%">%sveltekit.body%</div>
+    <script
+      src="https://richardschneider.github.io/cardsJS/cards.js"
+      type="text/javascript"
+    ></script>
+  </body>
 </html>
