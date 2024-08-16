@@ -18,47 +18,37 @@
     let room = data.room
 
     $: inplay = turn == currentPlayer;
-    $: lastmove = moves[moves.length - 1];
+    $: lastmove = moves[moves.length - 1] || [];
     
     room.connect();
-    
-    const unsubscribe1 = room.subscribe("event", ({ event: {
-                turn: newTurn,
-                players: players_,
-                droppedPits: droppedPits_,
-                moves: moves_,
-            }, user, connectionId }) => {
-                if (newTurn) turn = +newTurn;
-                if (players_?.[1]) players = players_;
-                if (droppedPits_?.length) droppedPits = droppedPits_;
-                if (moves_) moves = moves_;
-                console.log(players[1])
-    });
+
 
     let unsubscribe3;
     (async  () => {
         const { root } = await room.getStorage();
 
-        unsubscribe3 = room.subscribe(root, (updatedRoot) => {
-            console.log(updatedRoot)
+        unsubscribe3 = room.subscribe(root, (root) => {
+            const {
+                turn: newTurn,
+                players: players_,
+                droppedPits: droppedPits_,
+                moves: moves_,
+            } = root.toObject()
+
+            if (newTurn) turn = +newTurn;
+            if (players_?.[1].length) players = players_;
+            if (droppedPits_?.length) droppedPits = droppedPits_;
+            if (moves_) moves = moves_;
         });
     })()
-    
 
-    const unsubscribe2 = room.subscribe("others", (others, event) => {
-        if (others.length === 2) {
-            oppositePlayers = [1, 3, 5].includes(+currentPlayer)
-            ? [2, 4, 6]
-            : [1, 3, 5];
-            shuffle(room);
-
-        }
-    });
+    oppositePlayers = [1, 3, 5].includes(+currentPlayer)
+        ? [2, 4, 6]
+        : [1, 3, 5];
+        shuffle(room);
 
     onDestroy(() => {
         data.leave()
-        unsubscribe1()
-        unsubscribe2()
         unsubscribe3?.()
     })
 
@@ -112,7 +102,7 @@
         </div>
         <div class="col-md-6 d-flex" id="players-panel">
             {#each Object.keys(players) as t}
-                {#if t != currentPlayer}
+                {#if t !== currentPlayer}
                     <div class="player-block {turn == t ? 'active' : ''}">
                         Player {t}: <b>{players[t]?.length}</b>
                     </div>
@@ -194,7 +184,7 @@
                             on:click={() => {
                                 if (!callee) return;
                                 call(room, turn, callee, id);
-                                callee = null;
+                                callee = null
                                 options = [];
                             }}
                         />
