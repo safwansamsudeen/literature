@@ -2,10 +2,19 @@
     export let data;
     import { onDestroy } from "svelte";
     import { page } from "$app/stores";
-    import {browser} from '$app/environment'
+    import { browser } from "$app/environment";
 
-    import { dropPit, call, findPit, pretty, card, ORDERS, setup, broadcast } from "$lib/index";
-    
+    import {
+        dropPit,
+        call,
+        findPit,
+        pretty,
+        card,
+        ORDERS,
+        setup,
+        broadcast,
+    } from "$lib/index";
+
     let turn, timeout;
     let currentPlayer = +$page.params.player;
     let droppedPits = [];
@@ -17,15 +26,15 @@
     let callee;
     let gameId = $page.params.gameid;
 
-    let room = data.room
+    let room = data.room;
 
     $: inplay = turn == currentPlayer;
     $: lastmove = moves[moves.length - 1] || [];
 
     room.connect();
-    
+
     let unsubscribe;
-    (async  () => {
+    (async () => {
         const { root } = await room.getStorage();
 
         unsubscribe = room.subscribe(root, (root) => {
@@ -35,43 +44,45 @@
                 droppedPits: droppedPits_,
                 moves: moves_,
                 active: active_,
-            } = root.toObject()
+            } = root.toObject();
 
             if (newTurn) turn = +newTurn;
             if (players_?.[1].length) players = players_;
             if (droppedPits_?.length) droppedPits = droppedPits_;
             if (moves_) moves = moves_;
-            if (active_) active = active_
+            if (active_) active = active_;
         });
-    })()
+    })();
 
     oppositePlayers = [1, 3, 5].includes(+currentPlayer)
         ? [2, 4, 6]
         : [1, 3, 5];
 
-    
     async function destroy() {
-        unsubscribe?.()
+        unsubscribe?.();
         try {
-            const {root} = await room.getStorage();
-            let obj = root.toObject()
+            const { root } = await room.getStorage();
+            let obj = root.toObject();
             if (obj.active) {
-                let data = { active: [...obj.active.filter(id => id !== currentPlayer)] }
-                if (obj.active.length === 1) data.inprogress = false
-                await broadcast(room, data)
+                let data = {
+                    active: [
+                        ...obj.active.filter((id) => id !== currentPlayer),
+                    ],
+                };
+                if (obj.active.length === 1) data.inprogress = false;
+                await broadcast(room, data);
             }
         } finally {
-            data.leave()
+            data.leave();
         }
-        
     }
 
-    onDestroy(destroy)
+    onDestroy(destroy);
 
     if (browser) {
-        setup(room, currentPlayer)
-        window.onclose = destroy
-        window.onbeforeunload = destroy
+        setup(room, currentPlayer);
+        window.onclose = destroy;
+        window.onbeforeunload = destroy;
     }
 
     function showOptions(e) {
@@ -100,36 +111,37 @@
     }
 
     function showDrop(e) {
-        e.target.style.filter = 'brightness(0.35)';
-        let {top, height, left, width} = e.target.getBoundingClientRect()
+        e.target.style.filter = "brightness(0.35)";
+        let { top, height, left, width } = e.target.getBoundingClientRect();
 
-        let textOverlay = document.createElement('div');
-        textOverlay.textContent = 'Drop Pit'; 
-        
-        textOverlay.style.position = 'fixed';
-        textOverlay.style.top = top + height / 2 - 12 + 'px';
-        textOverlay.style.left = left + width / 2 - 31 + 'px';
+        let textOverlay = document.createElement("div");
+        textOverlay.textContent = "Drop Pit";
+
+        textOverlay.style.position = "fixed";
+        textOverlay.style.top = top + height / 2 - 12 + "px";
+        textOverlay.style.left = left + width / 2 - 31 + "px";
         // textOverlay.style.transform = 'translate(-50%, -50%)';
-        textOverlay.style.color = 'white';
-        textOverlay.style.fontSize = '1rem'; 
-        textOverlay.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.7)'; 
-        textOverlay.style.fontWeight = 'bold';
-        textOverlay.classList.add('drop-pit-banner')
+        textOverlay.style.color = "white";
+        textOverlay.style.fontSize = "1rem";
+        textOverlay.style.textShadow = "1px 1px 2px rgba(0, 0, 0, 0.7)";
+        textOverlay.style.fontWeight = "bold";
+        textOverlay.classList.add("drop-pit-banner");
         textOverlay.onclick = () => {
             let details = {};
-                    let pit = findPit(e.target.alt);
-                    let p = +prompt("Number of cards held by teammates");
-                    for (let i = 0; i < p; i++) {
-                        details[prompt("Card")] = +prompt("Teammate");
-                    }
-                    dropPit(room, currentPlayer, pit, details);
-                }
+            let pit = findPit(e.target.alt);
+            let p = +prompt("Number of cards held by teammates");
+            for (let i = 0; i < p; i++) {
+                details[prompt("Card")] = +prompt("Teammate");
+            }
+            dropPit(room, currentPlayer, pit, details);
+        };
         // Append the text overlay to the body
         document.body.appendChild(textOverlay);
     }
 </script>
+
 <svelte:head>
-    <title>Room {gameId} - Player {currentPlayer}</title> 
+    <title>Room {gameId} - Player {currentPlayer}</title>
 </svelte:head>
 
 <div class="container-fluid {inplay ? 'active' : ''}">
@@ -141,20 +153,25 @@
                         <p>Room ID: {gameId}</p>
                         <p>
                             {#if active.length > 1}
-                                <em><b>{active.length}</b> people are in this room.</em>
+                                <em
+                                    ><b>{active.length}</b> people are in this room.</em
+                                >
                             {:else}
                                 <em>You're the only one in the room.</em>
                             {/if}
                         </p>
                     </small>
-                    
                 </h5>
             </div>
         </div>
         <div class="col-md-6 d-flex" id="players-panel">
             {#each Object.keys(players) as t}
                 {#if t !== currentPlayer}
-                    <div class="player-block{turn == t ? ' active' : ''}{!active.includes(+t) ? ' striped' : ''}">
+                    <div
+                        class="player-block{turn == t
+                            ? ' active'
+                            : ''}{!active.includes(+t) ? ' striped' : ''}"
+                    >
                         Player {t}: <b>{players[t]?.length}</b>
                     </div>
                 {/if}
@@ -215,11 +232,17 @@
                                 src={card(id)}
                                 alt={id}
                                 on:click={showOptions}
-                                on:mouseenter={e => timeout = window.setTimeout(() => showDrop(e), 1500)}
-                                on:mouseleave={e => {
-                                    clearTimeout(timeout); 
-                                    document.querySelector('.drop-pit-banner')?.remove?.()
-                                    e.target.style.filter = 'brightness(1)'
+                                on:mouseenter={(e) =>
+                                    (timeout = window.setTimeout(
+                                        () => showDrop(e),
+                                        1500,
+                                    ))}
+                                on:mouseleave={(e) => {
+                                    clearTimeout(timeout);
+                                    document
+                                        .querySelector(".drop-pit-banner")
+                                        ?.remove?.();
+                                    e.target.style.filter = "brightness(1)";
                                 }}
                             />
                         {/each}
@@ -241,7 +264,7 @@
                             on:click={() => {
                                 if (!callee) return;
                                 call(room, turn, callee, id);
-                                callee = null
+                                callee = null;
                                 options = [];
                             }}
                         />
@@ -290,7 +313,13 @@
     }
 
     .striped {
-        background: repeating-linear-gradient(-45deg, #a6cbfc, #a6cbfc 5px, white 5px, white 10px) !important;
+        background: repeating-linear-gradient(
+            -45deg,
+            #a6cbfc,
+            #a6cbfc 5px,
+            white 5px,
+            white 10px
+        ) !important;
     }
 
     #current-player-block .hand {
@@ -308,14 +337,19 @@
     }
 
     .hand img.lit-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5); /* Adjust the opacity for the shadow effect */
-      pointer-events: none; /* Ensures the overlay does not interfere with clicking on the card */
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(
+            0,
+            0,
+            0,
+            0.5
+        ); /* Adjust the opacity for the shadow effect */
+        pointer-events: none; /* Ensures the overlay does not interfere with clicking on the card */
     }
 
     #dropped-pits .hand img.lit-card {
