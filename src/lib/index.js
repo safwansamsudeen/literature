@@ -1,10 +1,4 @@
-export function card(x) {
-  if (x.endsWith("J")) {
-    return `/${x}.svg`;
-  }
-  return `https://unpkg.com/cardsJS/dist/cards/${x}.svg`;
-}
-export const NUMBERS = [
+const NUMBERS = [
   "2",
   "3",
   "4",
@@ -20,14 +14,17 @@ export const NUMBERS = [
   "A",
 ];
 
-export const SUITS = ["S", "H", "D", "C"];
+const SUITS = ["S", "H", "D", "C"];
+const TRANSLATE_SUIT = {"S": "Spades", "H": "Hearts", "D": "Diamonds", "C": "Cloves"}
+const TRANSLATE_RANK = {"A": "Ace", "K": "King", "Q": "Queen", "J": "Jack"}
+
 export const ORDERS = {
   L: ["2", "3", "4", "5", "6", "7"],
   U: ["9", "T", "K", "Q", "J", "A"],
   J: ["1J", "2J", "8S", "8C", "8H", "8D"],
 };
 
-let turn = 2;
+let turn = 1;
 let moves = [];
 let droppedPits = [];
 let ids_global = [];
@@ -37,7 +34,7 @@ export async function broadcast(room, obj) {
   await root.update(obj);
 }
 
-export function shuffle(room) {
+function shuffle(room) {
   let ids = ["1J", "2J"];
   for (let s of SUITS) for (let n of NUMBERS) ids.push(n + s);
   for (let i = ids.length - 1; i > 0; i--) {
@@ -48,14 +45,20 @@ export function shuffle(room) {
   assignCards(room);
 }
 
-export async function assignCards(room) {
+export async function setup(room, player) {
+  let storage = await room.getStorage()
+  await broadcast(room, {active: [...storage.active, player]})
+  shuffle(room)
+}
+
+async function assignCards(room) {
   let players = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
 
   for (let t = 1; t <= 6; t++) {
     players[t] = ids_global.slice((t - 1) * 9, t * 9);
   }
 
-  await broadcast(room, { players, turn, droppedPits, moves });
+  await broadcast(room, { players, turn, droppedPits, moves, active: [] });
   return players;
 }
 
@@ -108,4 +111,17 @@ export async function dropPit(room, player, pit, details) {
   }
 
   broadcast(room, { droppedPits, players });
+}
+
+// Utilities
+export function card(x) {
+  if (x.endsWith("J")) {
+    return `/${x}.svg`;
+  }
+  return `https://unpkg.com/cardsJS/dist/cards/${x}.svg`;
+}
+
+export function pretty(card_id) {
+  let [rank, suit] = card_id.split('')
+  return `${'12345679'.includes(rank) ? rank : TRANSLATE_RANK[rank]} of ${TRANSLATE_SUIT[suit]}`
 }

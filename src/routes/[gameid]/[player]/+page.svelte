@@ -3,7 +3,7 @@
     import { onDestroy } from "svelte";
     import { page } from "$app/stores";
 
-    import {  dropPit, call, card, shuffle, ORDERS } from "$lib/index";
+    import {  dropPit, call, pretty, card, ORDERS, setup } from "$lib/index";
     
     let turn = 1;
     let currentPlayer = +$page.params.player;
@@ -22,11 +22,11 @@
     
     room.connect();
 
-    let unsubscribe3;
+    let unsubscribe;
     (async  () => {
         const { root } = await room.getStorage();
 
-        unsubscribe3 = room.subscribe(root, (root) => {
+        unsubscribe = room.subscribe(root, (root) => {
             const {
                 turn: newTurn,
                 players: players_,
@@ -45,11 +45,11 @@
         ? [2, 4, 6]
         : [1, 3, 5];
 
-    shuffle(room);  
+    setup(room, currentPlayer) 
 
     onDestroy(() => {
         data.leave()
-        unsubscribe3?.()
+        unsubscribe?.()
     })
 
     function showOptions(e) {
@@ -119,9 +119,9 @@
         >
             <i>Last Move</i>: {lastmove[0] === currentPlayer
                 ? "you"
-                : lastmove[0]} called {lastmove[1] === currentPlayer
+                : "Player " + lastmove[0]} called {lastmove[1] === currentPlayer
                 ? "you"
-                : lastmove[1]} for {lastmove[2]},
+                : "Player " + lastmove[1]} for {pretty(lastmove[2])},
             <b>{lastmove[3] === "W" ? "successfully" : "and didn't get it"}</b>.
         </div>
     {/if}

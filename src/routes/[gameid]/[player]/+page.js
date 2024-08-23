@@ -30,6 +30,5 @@ export function load({ params, fetch }) {
   });
 
   const { room, leave } = client.enterRoom("game-" + params.gameid);
-
   return { room, leave };
 }
