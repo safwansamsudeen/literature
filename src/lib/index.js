@@ -24,10 +24,6 @@ export const ORDERS = {
   J: ["1J", "2J", "8S", "8C", "8H", "8D"],
 };
 
-let turn = 1;
-let moves = [];
-let droppedPits = [];
-let ids_global = [];
 
 export async function broadcast(room, obj) {
   const { root } = await room.getStorage();
@@ -40,7 +36,7 @@ export async function setup(room, player) {
   await broadcast(room, {active: obj.active ? [...obj.active.filter(id => id !== player), player] : [player]})
 
   if(root.toObject().active.length === 6) {
-    if (!obj.inprogress || new Date() - new Date(obj.last_updated) > (10800000)) {
+    if (!obj.inprogress || new Date() - new Date(obj.last_updated) > (10800000) || !obj.players?.length) {
       shuffle(room)
     } 
     await broadcast(room, {inprogress: true})
@@ -54,33 +50,28 @@ function shuffle(room) {
     const j = Math.floor(Math.random() * (i + 1));
     [ids[i], ids[j]] = [ids[j], ids[i]];
   }
-  ids_global = ids;
-  assignCards(room);
+  assignCards(room, ids);
 }
 
 
-async function assignCards(room) {
+async function assignCards(room, ids) {
   let players = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
 
   for (let t = 1; t <= 6; t++) {
-    players[t] = ids_global.slice((t - 1) * 9, t * 9);
+    players[t] = ids.slice((t - 1) * 9, t * 9);
   }
 
-  await broadcast(room, { players, turn, droppedPits, moves });
+  await broadcast(room, { players, turn: 1, droppedPits: [], moves: [] });
   return players;
 }
 
 export async function call(room, player1, player2, id) {
   const { root } = await room.getStorage();
-  let players = root.toObject().players;
+  let {moves, players} = root.toObject();
 
   if (players[player1].includes(id)) {
-    console.log('darn!')
-    let [rank, suit] = id.split("")
-    let order = rank >= 2 && rank <= 7 ? "L" : "U"
-    await dropPit(room, player1, order + suit, {})
+    await dropPit(room, player1, findPit(id), {})
   } else if (!players[player2].includes(id)) {
-    turn = player2;
     moves.push([player1, player2, id, "L"]);
     await broadcast(room, { turn: player2, moves });
   } else {
@@ -93,7 +84,7 @@ export async function call(room, player1, player2, id) {
 
 export async function dropPit(room, player, pit, details) {
   const { root } = await room.getStorage();
-  let players = root.toObject().players;
+  let {players, droppedPits} = root.toObject();
 
   let [order, suit] = pit.split("");
   if (!suit) suit = "";
@@ -111,8 +102,6 @@ export async function dropPit(room, player, pit, details) {
       winnerBool = !winnerBool;
     }
   }
-
-  droppedPits.push({ pit, team: winnerBool ? "A" : "B", player, ids: pit_ids });
   for (let player in players) {
     players[player] = players[player].filter((id) => !pit_ids.includes(id));
   }
@@ -123,7 +112,7 @@ export async function dropPit(room, player, pit, details) {
     alert("Yayy, a pit is dropped!");
   }
 
-  broadcast(room, { droppedPits, players });
+  broadcast(room, { droppedPits: [...droppedPits, { pit, team: winnerBool ? "A" : "B", player, ids: pit_ids }], players });
 }
 
 
@@ -138,4 +127,12 @@ export function card(x) {
 export function pretty(card_id) {
   let [rank, suit] = card_id.split('')
   return `${'12345679'.includes(rank) ? rank : TRANSLATE_RANK[rank]} of ${TRANSLATE_SUIT[suit]}`
+}
+
+export function findPit(card_id) {
+  let [rank, suit] = id.split("")
+    let pit = (rank >= 2 && rank <= 7 ? "L" : "U") + suit;
+    if (suit === 'J' || +rank === 8) {
+      pit = "J";
+    }
 }

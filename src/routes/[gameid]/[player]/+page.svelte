@@ -4,9 +4,9 @@
     import { page } from "$app/stores";
     import {browser} from '$app/environment'
 
-    import {  dropPit, call, pretty, card, ORDERS, setup, broadcast } from "$lib/index";
+    import { dropPit, call, findPit, pretty, card, ORDERS, setup, broadcast } from "$lib/index";
     
-    let turn;
+    let turn, timeout;
     let currentPlayer = +$page.params.player;
     let droppedPits = [];
     let options = [];
@@ -98,6 +98,35 @@
 
         options = pit_ids;
     }
+
+    function showDrop(e) {
+        e.target.style.filter = 'brightness(0.35)';
+        let {top, height, left, width} = e.target.getBoundingClientRect()
+
+        let textOverlay = document.createElement('div');
+        textOverlay.textContent = 'Drop Pit'; 
+        
+        textOverlay.style.position = 'fixed';
+        textOverlay.style.top = top + height / 2 - 12 + 'px';
+        textOverlay.style.left = left + width / 2 - 31 + 'px';
+        // textOverlay.style.transform = 'translate(-50%, -50%)';
+        textOverlay.style.color = 'white';
+        textOverlay.style.fontSize = '1rem'; 
+        textOverlay.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.7)'; 
+        textOverlay.style.fontWeight = 'bold';
+        textOverlay.classList.add('drop-pit-banner')
+        textOverlay.onclick = () => {
+            let details = {};
+                    let pit = findPit(e.target.alt);
+                    let p = +prompt("Number of cards held by teammates");
+                    for (let i = 0; i < p; i++) {
+                        details[prompt("Card")] = +prompt("Teammate");
+                    }
+                    dropPit(room, currentPlayer, pit, details);
+                }
+        // Append the text overlay to the body
+        document.body.appendChild(textOverlay);
+    }
 </script>
 <svelte:head>
     <title>Room {gameId} - Player {currentPlayer}</title> 
@@ -120,19 +149,6 @@
                     </small>
                     
                 </h5>
-
-                <button
-                    class="btn btn-success btn-sm"
-                    on:click={() => {
-                        let details = {};
-                        let pit = prompt("Pit:");
-                        let p = +prompt("Number of cards held by teammates");
-                        for (let i = 0; i < p; i++) {
-                            details[prompt("Card")] = +prompt("Teammate");
-                        }
-                        dropPit(room, currentPlayer, pit, details);
-                    }}>Drop</button
-                >
             </div>
         </div>
         <div class="col-md-6 d-flex" id="players-panel">
@@ -199,6 +215,12 @@
                                 src={card(id)}
                                 alt={id}
                                 on:click={showOptions}
+                                on:mouseenter={e => timeout = window.setTimeout(() => showDrop(e), 1500)}
+                                on:mouseleave={e => {
+                                    clearTimeout(timeout); 
+                                    document.querySelector('.drop-pit-banner')?.remove?.()
+                                    e.target.style.filter = 'brightness(1)'
+                                }}
                             />
                         {/each}
                     {/if}
@@ -268,7 +290,7 @@
     }
 
     .striped {
-        background: repeating-linear-gradient(-45deg, #a6cbfc, #a6cbfc 5px, white 5px, white 10px);
+        background: repeating-linear-gradient(-45deg, #a6cbfc, #a6cbfc 5px, white 5px, white 10px) !important;
     }
 
     #current-player-block .hand {
@@ -283,6 +305,17 @@
         width: auto;
         max-width: 150px;
         transition: transform 0.2s;
+    }
+
+    .hand img.lit-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Adjust the opacity for the shadow effect */
+      pointer-events: none; /* Ensures the overlay does not interfere with clicking on the card */
     }
 
     #dropped-pits .hand img.lit-card {
@@ -301,6 +334,7 @@
     .player-block {
         height: min-content;
         border-radius: 20px;
+        background: #fff;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         text-align: center;
         padding: 6px 12px;
