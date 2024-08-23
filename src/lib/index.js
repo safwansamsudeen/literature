@@ -31,7 +31,7 @@ let ids_global = [];
 
 export async function broadcast(room, obj) {
   const { root } = await room.getStorage();
-  await root.update(obj);
+  await root.update({...obj, last_updated: new Date()});
 }
 
 export async function setup(room, player) {
@@ -40,9 +40,9 @@ export async function setup(room, player) {
   await broadcast(room, {active: obj.active ? [...obj.active.filter(id => id !== player), player] : [player]})
 
   if(root.toObject().active.length === 6) {
-    if (!obj.inprogress) {
+    if (!obj.inprogress || new Date() - new Date(obj.last_updated) > (10800000)) {
       shuffle(room)
-    }
+    } 
     await broadcast(room, {inprogress: true})
   }
 }
