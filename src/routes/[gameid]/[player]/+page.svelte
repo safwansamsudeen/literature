@@ -99,6 +99,9 @@
         options = pit_ids;
     }
 </script>
+<svelte:head>
+    <title>Room {gameId} - Player {currentPlayer}</title> 
+</svelte:head>
 
 <div class="container-fluid {inplay ? 'active' : ''}">
     <div class="row">

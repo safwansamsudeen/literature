@@ -74,7 +74,12 @@ export async function call(room, player1, player2, id) {
   const { root } = await room.getStorage();
   let players = root.toObject().players;
 
-  if (!players[player2].includes(id)) {
+  if (players[player1].includes(id)) {
+    console.log('darn!')
+    let [rank, suit] = id.split("")
+    let order = rank >= 2 && rank <= 7 ? "L" : "U"
+    await dropPit(room, player1, order + suit, {})
+  } else if (!players[player2].includes(id)) {
     turn = player2;
     moves.push([player1, player2, id, "L"]);
     await broadcast(room, { turn: player2, moves });
@@ -120,6 +125,7 @@ export async function dropPit(room, player, pit, details) {
 
   broadcast(room, { droppedPits, players });
 }
+
 
 // Utilities
 export function card(x) {
