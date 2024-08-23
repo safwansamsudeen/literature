@@ -2,14 +2,16 @@
     export let data;
     import { onDestroy } from "svelte";
     import { page } from "$app/stores";
+    import {browser} from '$app/environment'
 
-    import {  dropPit, call, pretty, card, ORDERS, setup } from "$lib/index";
+    import {  dropPit, call, pretty, card, ORDERS, setup, broadcast } from "$lib/index";
     
-    let turn = 1;
+    let turn;
     let currentPlayer = +$page.params.player;
     let droppedPits = [];
     let options = [];
     let moves = [];
+    let active = [];
     let players = {};
     let oppositePlayers = [];
     let callee;
@@ -19,9 +21,9 @@
 
     $: inplay = turn == currentPlayer;
     $: lastmove = moves[moves.length - 1] || [];
-    
-    room.connect();
 
+    room.connect();
+    
     let unsubscribe;
     (async  () => {
         const { root } = await room.getStorage();
@@ -32,12 +34,14 @@
                 players: players_,
                 droppedPits: droppedPits_,
                 moves: moves_,
+                active: active_,
             } = root.toObject()
 
             if (newTurn) turn = +newTurn;
             if (players_?.[1].length) players = players_;
             if (droppedPits_?.length) droppedPits = droppedPits_;
             if (moves_) moves = moves_;
+            if (active_) active = active_
         });
     })()
 
@@ -45,12 +49,30 @@
         ? [2, 4, 6]
         : [1, 3, 5];
 
-    setup(room, currentPlayer) 
-
-    onDestroy(() => {
-        data.leave()
+    
+    async function destroy() {
         unsubscribe?.()
-    })
+        try {
+            const {root} = await room.getStorage();
+            let obj = root.toObject()
+            if (obj.active) {
+                let data = { active: [...obj.active.filter(id => id !== currentPlayer)] }
+                if (obj.active.length === 1) data.inprogress = false
+                await broadcast(room, data)
+            }
+        } finally {
+            data.leave()
+        }
+        
+    }
+
+    onDestroy(destroy)
+
+    if (browser) {
+        setup(room, currentPlayer)
+        window.onclose = destroy
+        window.onbeforeunload = destroy
+    }
 
     function showOptions(e) {
         if (!inplay) return;
@@ -83,9 +105,19 @@
         <div class="col-md-6">
             <div id="intro">
                 <h5 class="text-muted w-20">
-                    <small>Game ID: {gameId}</small>
+                    <small>
+                        <p>Room ID: {gameId}</p>
+                        <p>
+                            {#if active.length > 1}
+                                <em><b>{active.length}</b> people are in this room.</em>
+                            {:else}
+                                <em>You're the only one in the room.</em>
+                            {/if}
+                        </p>
+                    </small>
+                    
                 </h5>
-                
+
                 <button
                     class="btn btn-success btn-sm"
                     on:click={() => {
@@ -103,7 +135,7 @@
         <div class="col-md-6 d-flex" id="players-panel">
             {#each Object.keys(players) as t}
                 {#if t !== currentPlayer}
-                    <div class="player-block {turn == t ? 'active' : ''}">
+                    <div class="player-block{turn == t ? ' active' : ''}{!active.includes(+t) ? ' striped' : ''}">
                         Player {t}: <b>{players[t]?.length}</b>
                     </div>
                 {/if}
@@ -141,7 +173,7 @@
                             bind:group={callee}
                         />
                         <label for={number} class="form-check-label"
-                            >{number}</label
+                            >Player {number}</label
                         >
                     </div>
                 {/each}
@@ -232,6 +264,9 @@
         margin-bottom: 20px;
     }
 
+    .striped {
+        background: repeating-linear-gradient(-45deg, #a6cbfc, #a6cbfc 5px, white 5px, white 10px);
+    }
 
     #current-player-block .hand {
         padding: 10px 0;
@@ -262,15 +297,15 @@
 
     .player-block {
         height: min-content;
-        background: #fff;
         border-radius: 20px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         text-align: center;
         padding: 6px 12px;
+        border: 1px solid black;
     }
 
     .player-block.active {
-        background-color: #f46036;
+        background: #f46036;
         color: white;
     }
 

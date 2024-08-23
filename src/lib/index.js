@@ -34,6 +34,19 @@ export async function broadcast(room, obj) {
   await root.update(obj);
 }
 
+export async function setup(room, player) {
+  let {root} = await room.getStorage()
+  let obj = root.toObject()
+  await broadcast(room, {active: obj.active ? [...obj.active.filter(id => id !== player), player] : [player]})
+
+  if(root.toObject().active.length === 6) {
+    if (!obj.inprogress) {
+      shuffle(room)
+    }
+    await broadcast(room, {inprogress: true})
+  }
+}
+
 function shuffle(room) {
   let ids = ["1J", "2J"];
   for (let s of SUITS) for (let n of NUMBERS) ids.push(n + s);
@@ -45,11 +58,6 @@ function shuffle(room) {
   assignCards(room);
 }
 
-export async function setup(room, player) {
-  let storage = await room.getStorage()
-  await broadcast(room, {active: [...storage.active, player]})
-  shuffle(room)
-}
 
 async function assignCards(room) {
   let players = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
@@ -58,7 +66,7 @@ async function assignCards(room) {
     players[t] = ids_global.slice((t - 1) * 9, t * 9);
   }
 
-  await broadcast(room, { players, turn, droppedPits, moves, active: [] });
+  await broadcast(room, { players, turn, droppedPits, moves });
   return players;
 }
 
