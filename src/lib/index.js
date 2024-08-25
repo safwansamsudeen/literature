@@ -141,8 +141,8 @@ export function pretty(card_id) {
 
 export function pretty_pit(pit_id) {
   if (pit_id === "J") return "Eights";
-  const [stage, suit] = pit_id.split("")
-  return `${stage === "L" ? "Lower" : "Upper"} ${TRANSLATE_SUIT[suit]}`
+  const [stage, suit] = pit_id.split("");
+  return `${stage === "L" ? "Lower" : "Upper"} ${TRANSLATE_SUIT[suit]}`;
 }
 
 export function findPit(card_id) {
