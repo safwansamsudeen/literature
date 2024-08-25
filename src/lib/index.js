@@ -74,7 +74,6 @@ async function assignCards(room, ids) {
 export async function call(room, player1, player2, id) {
   const { root } = await room.getStorage();
   let { moves, players } = root.toObject();
-
   if (players[player1].includes(id)) {
     await dropPit(room, player1, findPit(id), {});
   } else if (!players[player2].includes(id)) {
@@ -140,10 +139,17 @@ export function pretty(card_id) {
   return `${"12345679".includes(rank) ? rank : TRANSLATE_RANK[rank]} of ${TRANSLATE_SUIT[suit]}`;
 }
 
+export function pretty_pit(pit_id) {
+  if (pit_id === "J") return "Eights";
+  const [stage, suit] = pit_id.split("")
+  return `${stage === "L" ? "Lower" : "Upper"} ${TRANSLATE_SUIT[suit]}`
+}
+
 export function findPit(card_id) {
-  let [rank, suit] = id.split("");
+  let [rank, suit] = card_id.split("");
   let pit = (rank >= 2 && rank <= 7 ? "L" : "U") + suit;
   if (suit === "J" || +rank === 8) {
     pit = "J";
   }
+  return pit;
 }

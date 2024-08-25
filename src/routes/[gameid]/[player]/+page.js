@@ -3,6 +3,12 @@ import { browser } from "$app/environment";
 
 import WebSocket from "ws";
 
+function getRandomHexColor() {
+  const hex = Math.floor(Math.random() * 16777215).toString(16);
+  return `#${hex.padStart(6, '0')}`;
+}
+
+
 export function load({ params, fetch }) {
   const client = createClient({
     polyfills: {
@@ -28,7 +34,7 @@ export function load({ params, fetch }) {
       return await response.json();
     },
   });
-
+  
   const { room, leave } = client.enterRoom("game-" + params.gameid);
-  return { room, leave };
+  return { room, leave, background_color: `linear-gradient(135deg, ${getRandomHexColor()}, ${getRandomHexColor()})` };
 }

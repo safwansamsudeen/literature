@@ -1,6 +1,6 @@
 <script>
     export let data;
-    import { onDestroy } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import { page } from "$app/stores";
     import { browser } from "$app/environment";
 
@@ -9,6 +9,7 @@
         call,
         findPit,
         pretty,
+        pretty_pit,
         card,
         ORDERS,
         setup,
@@ -120,7 +121,6 @@
         textOverlay.style.position = "fixed";
         textOverlay.style.top = top + height / 2 - 12 + "px";
         textOverlay.style.left = left + width / 2 - 31 + "px";
-        // textOverlay.style.transform = 'translate(-50%, -50%)';
         textOverlay.style.color = "white";
         textOverlay.style.fontSize = "1rem";
         textOverlay.style.textShadow = "1px 1px 2px rgba(0, 0, 0, 0.7)";
@@ -138,13 +138,39 @@
         // Append the text overlay to the body
         document.body.appendChild(textOverlay);
     }
+
+    function getRandomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  // Create a given number of sleet flakes
+  function createSleet(numFlakes) {
+    const sleetContainer = document.querySelector('#loading .sleet');
+    for (let i = 0; i < numFlakes; i++) {
+      const flake = document.createElement('div');
+      flake.classList.add('flake');
+      flake.style.left = `${getRandomInRange(0, 100)}%`;
+      flake.style.animationDuration = `${getRandomInRange(2, 5)}s`;
+      flake.style.animationDelay = `${getRandomInRange(0, 5)}s`;
+      flake.style.transform = `scale(${getRandomInRange(0.5, 1)}`;
+      sleetContainer.appendChild(flake);
+    }
+  }
+
+  onMount(() => {
+    createSleet(100); // Adjust the number of flakes as needed
+  });
 </script>
 
 <svelte:head>
     <title>Room {gameId} - Player {currentPlayer}</title>
 </svelte:head>
+<div id="loading" style="">
+    <div class="sleet">
+    </div>
+</div>
 
-<div class="container-fluid {inplay ? 'active' : ''}">
+<div class="container-fluid {inplay ? 'active' : ''}" style="background: {data.background_color};">
     <div class="row">
         <div class="col-md-6">
             <div id="intro">
@@ -280,8 +306,8 @@
             <div class="card my-2 col-md-6">
                 <div class="card-body">
                     <p>
-                        {p.pit}:
-                        <i>For team {p.team}</i>
+                        <em>{pretty_pit(p.pit)}</em>: for team {p.team}
+                        <small> by Player {p.player}</small>
                     </p>
                     <div class="hand">
                         {#each p.ids as id}
@@ -302,10 +328,6 @@
         padding: 20px;
         min-height: 100vh;
         height: 100%;
-    }
-
-    .container-fluid.active {
-        background: linear-gradient(135deg, #99e1d9, #70abaf);
     }
 
     .row {
@@ -419,4 +441,43 @@
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
+
+    #loading {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #000; /* Dark background for contrast */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+  .sleet {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  :global(.flake) {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: white;
+    opacity: 0.8;
+    border-radius: 50%;
+    animation: fall linear;
+  }
+
+  @keyframes fall {
+    0% {
+      transform: translateY(-100vh);
+    }
+    100% {
+      transform: translateY(100vh);
+    }
+  }
 </style>
