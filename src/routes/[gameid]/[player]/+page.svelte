@@ -16,7 +16,7 @@
         broadcast,
     } from "$lib/index";
 
-    let turn, timeout;
+    let turn, timeout, in_pit_drop;
     let currentPlayer = +$page.params.player;
     let droppedPits = [];
     let options = [];
@@ -26,6 +26,7 @@
     let oppositePlayers = [];
     let callee;
     let gameId = $page.params.gameid;
+    let loading = true;
 
     let room = data.room;
 
@@ -52,6 +53,9 @@
             if (droppedPits_?.length) droppedPits = droppedPits_;
             if (moves_) moves = moves_;
             if (active_) active = active_;
+            if (browser && active.length >= 3) {
+                loading = false;
+            }
         });
     })();
 
@@ -84,11 +88,25 @@
         setup(room, currentPlayer);
         window.onclose = destroy;
         window.onbeforeunload = destroy;
+        if (active.length >= 3) {
+            setTimeout(() => loading = false, 200);
+        }
     }
 
     function showOptions(e) {
         if (!inplay) return;
-        let [number, suit] = e.target.alt;
+        if (in_pit_drop) {
+            let details = {};
+            let p = +prompt("Number of cards held by teammates");
+            if(!p) return
+            for (let i = 0; i < p; i++) {
+                let ans = prompt("Teammate")
+                if(!ans) return
+                details[prompt("Card")] = +ans;
+            }
+            if(confirm('Are you sure you want to drop this pit?')) dropPit(room, currentPlayer, findPit(e.target.alt), details);
+        } else {
+            let [number, suit] = e.target.alt;
         let pit_ids = [];
 
         let pit_order;
@@ -109,39 +127,26 @@
         }
 
         options = pit_ids;
+        }
+        
     }
 
     function showDrop(e) {
         e.target.style.filter = "brightness(0.35)";
-        let { top, height, left, width } = e.target.getBoundingClientRect();
 
-        let textOverlay = document.createElement("div");
-        textOverlay.textContent = "Drop Pit";
-
-        textOverlay.style.position = "fixed";
-        textOverlay.style.top = top + height / 2 - 12 + "px";
-        textOverlay.style.left = left + width / 2 - 31 + "px";
-        textOverlay.style.color = "white";
-        textOverlay.style.fontSize = "1rem";
-        textOverlay.style.textShadow = "1px 1px 2px rgba(0, 0, 0, 0.7)";
-        textOverlay.style.fontWeight = "bold";
-        textOverlay.classList.add("drop-pit-banner");
-        textOverlay.onclick = () => {
-            let details = {};
-            let pit = findPit(e.target.alt);
-            let p = +prompt("Number of cards held by teammates");
-            for (let i = 0; i < p; i++) {
-                details[prompt("Card")] = +prompt("Teammate");
-            }
-            dropPit(room, currentPlayer, pit, details);
-        };
-        // Append the text overlay to the body
-        document.body.appendChild(textOverlay);
+        var cardContainer = e.target.parentElement;
+        var textOverlay = document.createElement('div');
+        textOverlay.className = 'card-text'; 
+        textOverlay.textContent = 'Drop Pit'; 
+        
+        cardContainer.appendChild(textOverlay);
+        in_pit_drop = true
     }
 
+
     function getRandomInRange(min, max) {
-    return Math.random() * (max - min) + min;
-  }
+        return Math.random() * (max - min) + min;
+    }
 
   // Create a given number of sleet flakes
   function createSleet(numFlakes) {
@@ -163,14 +168,15 @@
 </script>
 
 <svelte:head>
-    <title>Room {gameId} - Player {currentPlayer}</title>
+    <title>Player {currentPlayer} - Room {gameId}</title>
 </svelte:head>
-<div id="loading" style="">
+<div id="loading" style="{loading ? '' : 'display: none;'}">
+    <h3 style="color: white; ">waiting for others...</h3>
     <div class="sleet">
     </div>
 </div>
 
-<div class="container-fluid {inplay ? 'active' : ''}" style="background: {data.background_color};">
+<div class="container-fluid {inplay ? 'active' : ''}" style="{inplay ? `background: ${data.background_color};` : ''} {loading ? `display: none;` : ''}">
     <div class="row">
         <div class="col-md-6">
             <div id="intro">
@@ -253,6 +259,7 @@
                 >
                     {#if players[currentPlayer]}
                         {#each players[currentPlayer] as id}
+                        <div class="card-container">
                             <img
                                 class="lit-card m-1"
                                 src={card(id)}
@@ -266,11 +273,13 @@
                                 on:mouseleave={(e) => {
                                     clearTimeout(timeout);
                                     document
-                                        .querySelector(".drop-pit-banner")
+                                        .querySelector(".card-text")
                                         ?.remove?.();
                                     e.target.style.filter = "brightness(1)";
+                                    in_pit_drop = false;
                                 }}
                             />
+                        </div>
                         {/each}
                     {/if}
                 </div>
@@ -301,9 +310,9 @@
     </div>
 
     <h3 class="text-center">Dropped Pits</h3>
-    <div class="row mt-3" id="dropped-pits">
+    <div class="row mt-3 mx-2" id="dropped-pits">
         {#each droppedPits as p}
-            <div class="card my-2 col-md-6">
+            <div class="card my-2 col-md-4">
                 <div class="card-body">
                     <p>
                         <em>{pretty_pit(p.pit)}</em>: for team {p.team}
@@ -370,12 +379,12 @@
             0,
             0,
             0.5
-        ); /* Adjust the opacity for the shadow effect */
-        pointer-events: none; /* Ensures the overlay does not interfere with clicking on the card */
+        ); 
+        pointer-events: none; 
     }
 
     #dropped-pits .hand img.lit-card {
-        max-width: 14%;
+        max-width: 13%;
         margin: 5px;
     }
 
@@ -469,7 +478,7 @@
     background: white;
     opacity: 0.8;
     border-radius: 50%;
-    animation: fall linear;
+    animation: fall linear infinite;
   }
 
   @keyframes fall {
@@ -480,4 +489,14 @@
       transform: translateY(100vh);
     }
   }
+
+  :global(.card-text) {
+      position: relative;
+      bottom: 55%;
+      color: white;
+      font-size: 1rem; /* Adjust text size */
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* Text shadow for better visibility */
+      font-weight: bold;
+      pointer-events: none; 
+    }
 </style>
