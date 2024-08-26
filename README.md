@@ -1,6 +1,9 @@
 # OLit
-## Your favorite Literature, now online
-![Icon](./static/favicon.png)
+
+<h2 align="center" style="border-bottom: none;">Your favorite Literature, now online</h2>
+<p align="center">
+  <img src="./static/favicon.png" width=200 alt="Sublime's custom image"/>
+</p>
 
 Welcome to the online version of the classic card game, Literature! Built using SvelteKit and Svelte, this app brings the fun and strategy of Literature to your browser, allowing you to play with friends in real-time.
 
